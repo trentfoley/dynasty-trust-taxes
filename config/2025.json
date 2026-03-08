@@ -1,0 +1,35 @@
+{
+  "tax_year": 2025,
+  "_notes": "Update trust.ein, trust.trustee_name, and trust.trustee_address with real values before running Phase 2.",
+  "trust": {
+    "name": "Trent Foley Childrens 2021 Super Dynasty Trust",
+    "ein": "XX-XXXXXXX",
+    "trustee_name": "Trent Foley",
+    "trustee_address": "..."
+  },
+  "paths": {
+    "csv_input": "2025/XXXX-X123.CSV",
+    "blank_form": "forms/f1041.pdf",
+    "output_dir": "output"
+  },
+  "ordinary_income_brackets": {
+    "10_pct_max": 3150,
+    "24_pct_max": 11450,
+    "35_pct_max": 15650,
+    "37_pct_rate": 0.37
+  },
+  "capital_gains_brackets": {
+    "0_pct_max": 3250,
+    "15_pct_max": 15900,
+    "20_pct_threshold": 15900
+  },
+  "niit": {
+    "rate": 0.038,
+    "threshold": 15650
+  },
+  "qdcg_worksheet": {
+    "0_pct_max": 3250,
+    "20_pct_threshold": 15900
+  },
+  "trust_exemption": 100
+}
