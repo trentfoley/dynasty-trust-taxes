@@ -18,13 +18,13 @@
 - [ ] **CALC-03**: Skill computes taxable income — gross income minus $100 complex trust exemption (Line 20)
 - [ ] **CALC-04**: Skill computes Schedule G tax using the Qualified Dividends and Capital Gains Tax Worksheet — required because trust has both qualified dividends and net long-term capital gains
 - [ ] **CALC-05**: Skill computes Form 8960 Net Investment Income Tax — 3.8% of lesser of (net investment income, AGI minus $15,650 threshold)
-- [ ] **CALC-06**: All tax bracket thresholds and rates are stored in `config/YEAR.json` — no bracket values hardcoded in any skill or script
+- [x] **CALC-06**: All tax bracket thresholds and rates are stored in `config/YEAR.json` — no bracket values hardcoded in any skill or script
 - [ ] **CALC-07**: Schedule B is computed (zero distribution deduction) and included in output — required on complex trust returns even when $0
 
 ### PDF Infrastructure (Phase 1)
 
 - [ ] **PDF-01**: AcroForm field names are discovered from blank `forms/f1041.pdf` via `pypdf PdfReader.get_fields()` and stored in `config/YEAR_fields.json`
-- [ ] **PDF-FILLER**: `fill_pdf.py` accepts `--fields <json>` and `--form <blank_pdf>` and writes a filled PDF with `NeedAppearances` set — this script is the only maintained Python artifact
+- [x] **PDF-FILLER**: `fill_pdf.py` accepts `--fields <json>` and `--form <blank_pdf>` and writes a filled PDF with `NeedAppearances` set — this script is the only maintained Python artifact
 
 ### PDF Output (Phase 2)
 
@@ -69,9 +69,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CALC-06 | Phase 1 | Pending |
+| CALC-06 | Phase 1 | Complete |
 | PDF-01 | Phase 1 | Pending |
-| PDF-FILLER | Phase 1 | Pending |
+| PDF-FILLER | Phase 1 | Complete |
 | PARSE-01 | Phase 2 | Pending |
 | PARSE-02 | Phase 2 | Pending |
 | PARSE-03 | Phase 2 | Pending |

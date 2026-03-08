@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-08T16:20:17.135Z"
+stopped_at: Completed 01-foundation 01-01-PLAN.md
+last_updated: "2026-03-08T17:37:14.653Z"
 last_activity: 2026-03-08 — Roadmap created, all 22 v1 requirements mapped across 5 phases
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01-foundation P01 | 2 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -59,6 +60,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - Foundation: Use brokerage CSV as primary data source; Python + pypdf as stack; fill existing IRS AcroForm PDF
+- [Phase 01-foundation]: Named bracket thresholds in config/2025.json — all rate values consumed from config, never hardcoded in scripts
+- [Phase 01-foundation]: fill_pdf.py translates 'Yes' checkbox values to On-state via /_States_ runtime lookup — resilient to PDFs using non-standard On-state values
+- [Phase 01-foundation]: Hard-fail on unknown AcroForm field names: collect all errors before exit(1)
 
 ### Pending Todos
 
@@ -71,6 +75,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T16:20:17.132Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-foundation/01-CONTEXT.md
+Last session: 2026-03-08T17:37:14.649Z
+Stopped at: Completed 01-foundation 01-01-PLAN.md
+Resume file: None
