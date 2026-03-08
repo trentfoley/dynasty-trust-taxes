@@ -43,6 +43,12 @@ Plans:
   4. The skill produces a field-value mapping that covers every field populated on the 2024 reference return and calls `fill_pdf.py` to write `output/2025_1041_filled.pdf`
   5. Dry-run mode prints all computed field values without writing any file
   6. The filled PDF opens in a browser PDF viewer with all values visibly filled
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Download IRS PDFs (Schedule D, Form 8960, Form 8949), extend field catalog, create fill_1041.py skeleton with CSV parser
+- [ ] 02-02-PLAN.md — Implement tax computation engine (Schedule D, G, B, Form 8960 NIIT, validation) and full dry-run output
+- [ ] 02-03-PLAN.md — Wire live PDF output per form, create /fill-1041 slash command, visual verification checkpoint
 
 ## Progress
 
@@ -52,9 +58,10 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-08 |
-| 2. Core Skill | 0/TBD | Not started | - |
+| 2. Core Skill | 0/3 | Not started | - |
 
 ---
 *Created: 2026-03-08*
 *Revised: 2026-03-08 — switched from 5-phase Python pipeline to 2-phase Claude skill approach*
 *Revised: 2026-03-08 — Phase 1 plans created (2 plans, Wave 1 parallel)*
+*Revised: 2026-03-08 — Phase 2 plans created (3 plans, Wave 1-2-3 sequential)*
