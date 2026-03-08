@@ -42,7 +42,7 @@
     "q6_sec663b_election": false,
     "q7_sec643e3_election": false,
     "q8_estate_open_2years": false,
-    "q9_beneficiaries_skip_persons": "Yes",
+    "q9_beneficiaries_skip_persons": "No",
     "q10_form8938_required": "No",
     "q11a_965i_distribution": "No",
     "q11b_beneficiary_agreement": "No",
