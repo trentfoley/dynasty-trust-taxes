@@ -485,6 +485,28 @@ def build_field_maps(computed, fields, cfg=None):
                 if fid:
                     form_1041_map[fid] = "Yes"
 
+    # Header fields (name, EIN, address, dates) from cfg
+    if cfg:
+        trust = cfg.get("trust", {})
+        year = cfg.get("tax_year", 2025)
+        year_2digit = str(year)[-2:]
+        header_mappings = {
+            "trust_name":            trust.get("name"),
+            "ein":                   trust.get("ein"),
+            "fiduciary_name_title":  trust.get("fiduciary_name_title"),
+            "address_street":        trust.get("address_street"),
+            "address_city":          trust.get("address_city"),
+            "address_state":         trust.get("address_state"),
+            "address_zip":           trust.get("address_zip"),
+            "date_entity_created":   trust.get("date_entity_created"),
+            "num_schedules_k1":      trust.get("num_schedules_k1"),
+            "tax_year_end_year":     year_2digit,
+        }
+        for sem, val in header_mappings.items():
+            fid = resolve(page1_fields, sem)
+            if fid and val is not None:
+                form_1041_map[fid] = str(val)
+
     # Schedule B fields (embedded in f1041.pdf Page 2)
     sched_b_mappings = {
         "adjusted_total_income":                computed.get("sched_b_adjusted_total_income"),

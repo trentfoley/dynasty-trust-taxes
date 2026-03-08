@@ -3,9 +3,14 @@
   "_notes": "Update trust.ein, trust.trustee_name, and trust.trustee_address with real values before running Phase 2.",
   "trust": {
     "name": "Trent Foley Childrens 2021 Super Dynasty Trust",
-    "ein": "XX-XXXXXXX",
-    "trustee_name": "Trent Foley",
-    "trustee_address": "..."
+    "ein": "87-6893299",
+    "fiduciary_name_title": "Trent Thomas Foley, Trustee",
+    "address_street": "319 Ridgehaven Pl",
+    "address_city": "Richardson",
+    "address_state": "TX",
+    "address_zip": "75080",
+    "date_entity_created": "12/16/2021",
+    "num_schedules_k1": "0"
   },
   "paths": {
     "csv_input": "2025/XXXX-X123.CSV",
