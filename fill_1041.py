@@ -297,9 +297,11 @@ def compute_schedule_b(page1):
 
     All distribution fields are $0. Income distribution deduction is $0.
     Distributable net income equals total income (adjusted total income).
+    Accounting income (Line 8, complex trust only) equals total income per 2024 precedent.
     """
     return {
         "adjusted_total_income": page1["total_income"],
+        "accounting_income": page1["total_income"],
         "income_required_to_be_distributed": 0.0,
         "other_amounts_distributed": 0.0,
         "total_distributions": 0.0,
@@ -510,6 +512,7 @@ def build_field_maps(computed, fields, cfg=None):
     # Schedule B fields (embedded in f1041.pdf Page 2)
     sched_b_mappings = {
         "adjusted_total_income":                computed.get("sched_b_adjusted_total_income"),
+        "accounting_income":                    computed.get("sched_b_accounting_income"),
         "income_required_to_be_distributed":    computed.get("income_required_to_be_distributed"),
         "other_amounts_distributed":            computed.get("other_amounts_distributed"),
         "total_distributions":                  computed.get("total_distributions"),
@@ -841,6 +844,7 @@ def main():
     computed = {**csv_data, **page1}
     computed.update({
         "sched_b_adjusted_total_income": sched_b["adjusted_total_income"],
+        "sched_b_accounting_income": sched_b["accounting_income"],
         "income_required_to_be_distributed": sched_b["income_required_to_be_distributed"],
         "other_amounts_distributed": sched_b["other_amounts_distributed"],
         "total_distributions": sched_b["total_distributions"],
@@ -1000,6 +1004,7 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
     computed.update(page1)
     computed.update({
         "sched_b_adjusted_total_income": sched_b["adjusted_total_income"],
+        "sched_b_accounting_income": sched_b["accounting_income"],
         "income_required_to_be_distributed": sched_b["income_required_to_be_distributed"],
         "other_amounts_distributed": sched_b["other_amounts_distributed"],
         "total_distributions": sched_b["total_distributions"],
