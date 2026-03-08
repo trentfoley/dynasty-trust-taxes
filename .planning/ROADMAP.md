@@ -58,7 +58,7 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-08 |
-| 2. Core Skill | 1/3 | In Progress|  |
+| 2. Core Skill | 2/3 | In Progress|  |
 
 ---
 *Created: 2026-03-08*

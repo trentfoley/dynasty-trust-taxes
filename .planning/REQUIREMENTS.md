@@ -14,12 +14,12 @@
 ### Tax Computation
 
 - [x] **CALC-01**: Skill computes Form 8949 rows — assigns Box A (short-term covered) or Box D (long-term covered) based on transaction flags and calculates gain/loss per transaction
-- [ ] **CALC-02**: Skill computes Schedule D — net short-term capital gain/loss (Part I) and net long-term capital gain/loss (Part II) from Form 8949 rows
-- [ ] **CALC-03**: Skill computes taxable income — gross income minus $100 complex trust exemption (Line 20)
-- [ ] **CALC-04**: Skill computes Schedule G tax using the Qualified Dividends and Capital Gains Tax Worksheet — required because trust has both qualified dividends and net long-term capital gains
-- [ ] **CALC-05**: Skill computes Form 8960 Net Investment Income Tax — 3.8% of lesser of (net investment income, AGI minus $15,650 threshold)
+- [x] **CALC-02**: Skill computes Schedule D — net short-term capital gain/loss (Part I) and net long-term capital gain/loss (Part II) from Form 8949 rows
+- [x] **CALC-03**: Skill computes taxable income — gross income minus $100 complex trust exemption (Line 20)
+- [x] **CALC-04**: Skill computes Schedule G tax using the Qualified Dividends and Capital Gains Tax Worksheet — required because trust has both qualified dividends and net long-term capital gains
+- [x] **CALC-05**: Skill computes Form 8960 Net Investment Income Tax — 3.8% of lesser of (net investment income, AGI minus $15,650 threshold)
 - [x] **CALC-06**: All tax bracket thresholds and rates are stored in `config/YEAR.json` — no bracket values hardcoded in any skill or script
-- [ ] **CALC-07**: Schedule B is computed (zero distribution deduction) and included in output — required on complex trust returns even when $0
+- [x] **CALC-07**: Schedule B is computed (zero distribution deduction) and included in output — required on complex trust returns even when $0
 
 ### PDF Infrastructure (Phase 1)
 
@@ -38,8 +38,8 @@
 ### Skill Invocation
 
 - [ ] **SKILL-01**: Skill is invocable via a single Claude skill command (e.g., `/fill-1041`) with optional year argument — defaults to current year config
-- [ ] **SKILL-02**: Skill supports dry-run mode — outputs all computed field values without calling `fill_pdf.py` or writing any file
-- [ ] **SKILL-03**: Skill validates computed income totals against CSV source data and surfaces any mismatch before producing PDF output
+- [x] **SKILL-02**: Skill supports dry-run mode — outputs all computed field values without calling `fill_pdf.py` or writing any file
+- [x] **SKILL-03**: Skill validates computed income totals against CSV source data and surfaces any mismatch before producing PDF output
 - [x] **SKILL-04**: All file paths (CSV input, blank form PDF, output PDF) use sensible defaults from `config/YEAR.json` and can be overridden
 
 ## v2 Requirements
@@ -76,11 +76,11 @@
 | PARSE-02 | Phase 2 | Complete |
 | PARSE-03 | Phase 2 | Complete |
 | CALC-01 | Phase 2 | Complete |
-| CALC-02 | Phase 2 | Pending |
-| CALC-03 | Phase 2 | Pending |
-| CALC-04 | Phase 2 | Pending |
-| CALC-05 | Phase 2 | Pending |
-| CALC-07 | Phase 2 | Pending |
+| CALC-02 | Phase 2 | Complete |
+| CALC-03 | Phase 2 | Complete |
+| CALC-04 | Phase 2 | Complete |
+| CALC-05 | Phase 2 | Complete |
+| CALC-07 | Phase 2 | Complete |
 | PDF-02 | Phase 2 | Pending |
 | PDF-03 | Phase 2 | Pending |
 | PDF-04 | Phase 2 | Pending |
@@ -88,8 +88,8 @@
 | PDF-06 | Phase 2 | Pending |
 | PDF-07 | Phase 2 | Pending |
 | SKILL-01 | Phase 2 | Pending |
-| SKILL-02 | Phase 2 | Pending |
-| SKILL-03 | Phase 2 | Pending |
+| SKILL-02 | Phase 2 | Complete |
+| SKILL-03 | Phase 2 | Complete |
 | SKILL-04 | Phase 2 | Complete |
 
 **Coverage:**

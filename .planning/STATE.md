@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-core-skill/02-01 — plan complete, ready for 02-02
-last_updated: "2026-03-08T21:56:15.834Z"
+stopped_at: Completed 02-core-skill/02-02 — computation engine complete, ready for 02-03
+last_updated: "2026-03-08T22:02:47.340Z"
 last_activity: 2026-03-08 — Roadmap created, all 22 v1 requirements mapped across 5 phases
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation P02 | 45 | 2 tasks | 1 files |
 | Phase 02-core-skill P01 | 5 | 2 tasks | 5 files |
 | Phase 02-core-skill P01 | 5 | 2 tasks | 5 files |
+| Phase 02-core-skill P02 | 4 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 02-core-skill]: schedule_d field mapping: short_term_proceeds=f1_19, net_short_term_gain_loss=f1_22, long_term_proceeds=f1_39, net_long_term_gain_loss=f1_42, net_capital_gain=Part3/Line19/f2_15
 - [Phase 02-core-skill]: form_8960 NIIT amount (Line 21) = f1_35; trust entity checkbox = c1_1[2]
 - [Phase 02-core-skill]: form_8949 Box A (short-term covered) = c1_1[0] Page1; Box D (long-term covered) = c2_1[0] Page2; 6 checkboxes per page at indices [0..5]
+- [Phase 02-core-skill]: compute_schedule_g() reads all bracket thresholds from cfg — no hardcoded constants
+- [Phase 02-core-skill]: validate() augments csv_data with raw transaction re-sum for st_gain/lt_gain before comparing to computed values
+- [Phase 02-core-skill]: Schedule G tax /usr/bin/bash.01 rounding diff (9,722.92 vs 9,722.93) is float precision on ordinary_income — within tolerance
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T21:56:15.830Z
-Stopped at: Completed 02-core-skill/02-01 — plan complete, ready for 02-02
+Last session: 2026-03-08T22:02:47.335Z
+Stopped at: Completed 02-core-skill/02-02 — computation engine complete, ready for 02-03
 Resume file: None
