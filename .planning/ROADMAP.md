@@ -26,7 +26,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. `config/2025_fields.json` exists and contains all AcroForm field names discovered from `forms/f1041.pdf` via `pypdf PdfReader.get_fields()` — field names are real, not placeholder
   3. `fill_pdf.py` accepts `--fields <json_file>` and `--form <blank_pdf>` and writes a filled PDF to `output/YEAR_1041_filled.pdf` with `NeedAppearances` set — running it against a test field map produces a visible-field PDF
   4. Running `python fill_pdf.py --help` succeeds — the filler is operational with no additional dependencies
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Create config/2025.json (tax brackets + trust metadata), fill_pdf.py (PDF filler), requirements.txt, and smoke test
+- [ ] 01-02-PLAN.md — Discover AcroForm fields from forms/f1041.pdf and write semantically-mapped config/2025_fields.json with human verification
 
 ### Phase 2: Core Skill
 **Goal**: A single Claude skill invocation reads the brokerage CSV, computes all tax schedules correctly, maps values to the known AcroForm fields, and produces a print-ready filled PDF
@@ -47,9 +51,10 @@ Phases execute in numeric order: 1 → 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/2 | Not started | - |
 | 2. Core Skill | 0/TBD | Not started | - |
 
 ---
 *Created: 2026-03-08*
 *Revised: 2026-03-08 — switched from 5-phase Python pipeline to 2-phase Claude skill approach*
+*Revised: 2026-03-08 — Phase 1 plans created (2 plans, Wave 1 parallel)*
