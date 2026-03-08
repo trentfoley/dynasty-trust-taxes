@@ -415,7 +415,7 @@ def validate(csv_data, computed, tolerance=1.00):
     return mismatches
 
 
-def build_field_maps(computed, fields):
+def build_field_maps(computed, fields, cfg=None):
     """Map semantic computed values to AcroForm field IDs.
 
     Returns dict keyed by form name:
@@ -423,6 +423,7 @@ def build_field_maps(computed, fields):
 
     Skips fields where field_id is None (null placeholders).
     For form_1041: merges page1, schedule_b, and schedule_g (all in f1041.pdf).
+    cfg is optional; when provided it drives entity_type and other_information checkboxes.
     """
 
     def resolve(section_dict, semantic_name):
@@ -461,6 +462,29 @@ def build_field_maps(computed, fields):
         if fid and val is not None:
             form_1041_map[fid] = f"{val:.2f}"
 
+    # Line 17: adjusted total income (= total income; no above-line deductions for this trust)
+    fid = resolve(page1_fields, "adjusted_total_income")
+    if fid:
+        form_1041_map[fid] = f"{computed.get('total_income', 0.0):.2f}"
+
+    # Line 22: total of Lines 18-21 (IDD + estate_tax_deduction + QBI + exemption)
+    fid = resolve(page1_fields, "deductions_total_lines18_21")
+    if fid:
+        deductions_18_21 = round(
+            computed.get("income_distribution_deduction", 0.0) + computed.get("exemption", 0.0), 2
+        )
+        form_1041_map[fid] = f"{deductions_18_21:.2f}"
+
+    # Entity type checkbox (Page 1, Line A)
+    if cfg:
+        entity_type = cfg.get("entity_type", "")
+        if entity_type:
+            entry = page1_fields.get(f"entity_type_{entity_type}")
+            if isinstance(entry, dict):
+                fid = entry.get("field_id")
+                if fid:
+                    form_1041_map[fid] = "Yes"
+
     # Schedule B fields (embedded in f1041.pdf Page 2)
     sched_b_mappings = {
         "adjusted_total_income":                computed.get("sched_b_adjusted_total_income"),
@@ -477,14 +501,53 @@ def build_field_maps(computed, fields):
 
     # Schedule G fields (embedded in f1041.pdf Pages 2-3)
     sched_g_mappings = {
-        "tax_on_taxable_income": computed.get("tax_on_taxable_income"),
-        "niit_form_8960_line21":  computed.get("niit_amount"),
-        "total_tax":              computed.get("total_tax"),
+        "tax_on_taxable_income": computed.get("tax_on_taxable_income"),  # Line 1a
+        "total_tax_lines1a_1d":  computed.get("tax_on_taxable_income"),  # Line 1e (= 1a; no 1b-1d)
+        "tax_after_credits":     computed.get("tax_on_taxable_income"),  # Line 3 (= 1e; no credits)
+        "niit_form_8960_line21": computed.get("niit_amount"),            # Line 5
+        "total_tax":             computed.get("total_tax"),              # Line 9
     }
     for sem, val in sched_g_mappings.items():
         fid = resolve(sched_g_fields, sem)
         if fid and val is not None:
             form_1041_map[fid] = f"{val:.2f}"
+
+    # Other Information checkboxes (Page 3)
+    if cfg:
+        oi_answers = cfg.get("other_information", {})
+        oi_fields = fields.get("other_information", {})
+
+        yes_no_qs = [
+            "q1_tax_exempt_income",
+            "q2_contract_assignment",
+            "q3_foreign_account",
+            "q4_foreign_trust",
+            "q5_qualified_residence_interest",
+            "q9_beneficiaries_skip_persons",
+            "q10_form8938_required",
+            "q11a_965i_distribution",
+            "q11b_beneficiary_agreement",
+            "q12_965i_transfer",
+            "q13_digital_assets",
+        ]
+        for q in yes_no_qs:
+            answer = oi_answers.get(q, "")
+            if answer in ("Yes", "No"):
+                key = f"{q}_yes" if answer == "Yes" else f"{q}_no"
+                entry = oi_fields.get(key)
+                if isinstance(entry, dict):
+                    fid = entry.get("field_id")
+                    if fid:
+                        form_1041_map[fid] = "Yes"  # fill_pdf.py translates "Yes" → on_state
+
+        single_qs = ["q6_sec663b_election", "q7_sec643e3_election", "q8_estate_open_2years"]
+        for q in single_qs:
+            if oi_answers.get(q, False):
+                entry = oi_fields.get(q)
+                if isinstance(entry, dict):
+                    fid = entry.get("field_id")
+                    if fid:
+                        form_1041_map[fid] = "Yes"
 
     # ---- Schedule D (f1041sd.pdf) ----
     schedule_d_map = {}
@@ -787,7 +850,7 @@ def main():
         "net_combined": sched_d["net_combined"],
         "rows": sched_d["rows"],
     })
-    field_maps = build_field_maps(computed, fields)
+    field_maps = build_field_maps(computed, fields, cfg)
 
     # 9. Output paths and form PDFs
     year = args.year
@@ -807,7 +870,7 @@ def main():
 
     # 10. Dry-run: print full computation steps + field-value mapping then exit
     if args.dry_run:
-        _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields)
+        _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg)
         sys.exit(0)
 
     # 11. Live mode: write filled PDFs
@@ -822,7 +885,7 @@ def main():
     print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()])
 
 
-def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields):
+def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg=None):
     """Print full dry-run output: computation steps + field-value mapping."""
 
     total_tax = sched_g["tax_on_taxable_income"] + form_8960["niit_amount"]
@@ -948,7 +1011,7 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
         "rows": sched_d["rows"],
     })
 
-    field_maps = build_field_maps(computed, fields)
+    field_maps = build_field_maps(computed, fields, cfg)
 
     print()
     print("=== Field-Value Mapping ===")

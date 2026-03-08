@@ -31,5 +31,22 @@
     "0_pct_max": 3250,
     "20_pct_threshold": 15900
   },
-  "trust_exemption": 100
+  "trust_exemption": 100,
+  "entity_type": "complex_trust",
+  "other_information": {
+    "q1_tax_exempt_income": "No",
+    "q2_contract_assignment": "No",
+    "q3_foreign_account": "No",
+    "q4_foreign_trust": "No",
+    "q5_qualified_residence_interest": "No",
+    "q6_sec663b_election": false,
+    "q7_sec643e3_election": false,
+    "q8_estate_open_2years": false,
+    "q9_beneficiaries_skip_persons": "Yes",
+    "q10_form8938_required": "No",
+    "q11a_965i_distribution": "No",
+    "q11b_beneficiary_agreement": "No",
+    "q12_965i_transfer": "No",
+    "q13_digital_assets": "No"
+  }
 }
