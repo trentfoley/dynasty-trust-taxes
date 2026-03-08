@@ -7,13 +7,13 @@
 
 ### Input Parsing
 
-- [ ] **PARSE-01**: Skill parses 1099-DIV section from brokerage CSV — extracts ordinary dividends (Box 1a) and qualified dividends (Box 1b)
-- [ ] **PARSE-02**: Skill parses 1099-INT section from brokerage CSV — extracts interest income (Box 1)
-- [ ] **PARSE-03**: Skill parses 1099-B section from brokerage CSV — extracts each capital transaction row with: description, date acquired, date sold, proceeds, cost basis, wash sale loss disallowed, and short/long-term flag
+- [x] **PARSE-01**: Skill parses 1099-DIV section from brokerage CSV — extracts ordinary dividends (Box 1a) and qualified dividends (Box 1b)
+- [x] **PARSE-02**: Skill parses 1099-INT section from brokerage CSV — extracts interest income (Box 1)
+- [x] **PARSE-03**: Skill parses 1099-B section from brokerage CSV — extracts each capital transaction row with: description, date acquired, date sold, proceeds, cost basis, wash sale loss disallowed, and short/long-term flag
 
 ### Tax Computation
 
-- [ ] **CALC-01**: Skill computes Form 8949 rows — assigns Box A (short-term covered) or Box D (long-term covered) based on transaction flags and calculates gain/loss per transaction
+- [x] **CALC-01**: Skill computes Form 8949 rows — assigns Box A (short-term covered) or Box D (long-term covered) based on transaction flags and calculates gain/loss per transaction
 - [ ] **CALC-02**: Skill computes Schedule D — net short-term capital gain/loss (Part I) and net long-term capital gain/loss (Part II) from Form 8949 rows
 - [ ] **CALC-03**: Skill computes taxable income — gross income minus $100 complex trust exemption (Line 20)
 - [ ] **CALC-04**: Skill computes Schedule G tax using the Qualified Dividends and Capital Gains Tax Worksheet — required because trust has both qualified dividends and net long-term capital gains
@@ -40,7 +40,7 @@
 - [ ] **SKILL-01**: Skill is invocable via a single Claude skill command (e.g., `/fill-1041`) with optional year argument — defaults to current year config
 - [ ] **SKILL-02**: Skill supports dry-run mode — outputs all computed field values without calling `fill_pdf.py` or writing any file
 - [ ] **SKILL-03**: Skill validates computed income totals against CSV source data and surfaces any mismatch before producing PDF output
-- [ ] **SKILL-04**: All file paths (CSV input, blank form PDF, output PDF) use sensible defaults from `config/YEAR.json` and can be overridden
+- [x] **SKILL-04**: All file paths (CSV input, blank form PDF, output PDF) use sensible defaults from `config/YEAR.json` and can be overridden
 
 ## v2 Requirements
 
@@ -72,10 +72,10 @@
 | CALC-06 | Phase 1 | Complete |
 | PDF-01 | Phase 1 | Complete |
 | PDF-FILLER | Phase 1 | Complete |
-| PARSE-01 | Phase 2 | Pending |
-| PARSE-02 | Phase 2 | Pending |
-| PARSE-03 | Phase 2 | Pending |
-| CALC-01 | Phase 2 | Pending |
+| PARSE-01 | Phase 2 | Complete |
+| PARSE-02 | Phase 2 | Complete |
+| PARSE-03 | Phase 2 | Complete |
+| CALC-01 | Phase 2 | Complete |
 | CALC-02 | Phase 2 | Pending |
 | CALC-03 | Phase 2 | Pending |
 | CALC-04 | Phase 2 | Pending |
@@ -90,7 +90,7 @@
 | SKILL-01 | Phase 2 | Pending |
 | SKILL-02 | Phase 2 | Pending |
 | SKILL-03 | Phase 2 | Pending |
-| SKILL-04 | Phase 2 | Pending |
+| SKILL-04 | Phase 2 | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total

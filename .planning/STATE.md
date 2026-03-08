@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-08T20:13:11.999Z"
+stopped_at: "Completed 02-core-skill-02-01-PLAN.md — checkpoint:human-verify reached"
+last_updated: "2026-03-08T20:50:52.460Z"
 last_activity: 2026-03-08 — Roadmap created, all 22 v1 requirements mapped across 5 phases
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 5
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 2 | 3 tasks | 5 files |
 | Phase 01-foundation P02 | 45 | 2 tasks | 1 files |
+| Phase 02-core-skill P01 | 5 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,10 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: schedule_d and form_8960 are separate PDFs — those catalog sections use null field IDs with cross-reference keys for values flowing into f1041.pdf
 - [Phase 01-foundation]: g2_trust_tin uses f1_15 (header field); income body text fields start at f1_16 — off-by-one confirmed by human fill test
 - [Phase 01-foundation]: refund_routing_number uses comb container path Line30cCombfield[0].f1_52[0]; sign_date renamed to sign_ein_fiduciary (f1_54 is EIN of fiduciary)
+- [Phase 02-core-skill]: 1099-B section has two header rows to skip (field-number row + column-name row)
+- [Phase 02-core-skill]: schedule_d field IDs confirmed: short_term summary=f1_19-f1_22, long_term=f1_39-f1_42, net_capital_gain=Part3/Line19/f2_15
+- [Phase 02-core-skill]: form_8960 NIIT amount (Line 21) = f1_35; trust entity checkbox = c1_1[2]
+- [Phase 02-core-skill]: form_8949 Box A (short-term covered)=c1_1[0] Page1, Box D (long-term covered)=c2_1[0] Page2
 
 ### Pending Todos
 
@@ -79,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T20:13:11.996Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-core-skill/02-CONTEXT.md
+Last session: 2026-03-08T20:50:52.456Z
+Stopped at: Completed 02-core-skill-02-01-PLAN.md — checkpoint:human-verify reached
+Resume file: None
