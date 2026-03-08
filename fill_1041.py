@@ -10,7 +10,6 @@ Python executable: /c/ProgramData/miniconda3/python (NOT python3 -- Windows Stor
 import argparse
 import csv
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -134,7 +133,6 @@ def parse_csv(csv_path):
             # Skip completely blank rows and reset section
             if not any(row):
                 section = None
-                b_col_headers_seen = False
                 continue
 
             # Detect section headers
