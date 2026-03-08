@@ -55,14 +55,15 @@ def parse_args():
 def get_on_state(field):
     """Return the On-state string for a checkbox field by reading /_States_.
 
-    Looks for the first state that is not '/Off' and strips the leading '/'.
-    Falls back to '1' if /_States_ is absent or has no non-Off state.
+    Looks for the first state that is not '/Off'. Returns the value as-is
+    (including the leading '/') since pypdf requires the slash-prefixed name.
+    Falls back to '/1' if /_States_ is absent or has no non-Off state.
     """
     states = field.get("/_States_", [])
     for state in states:
         if state != "/Off":
-            return state.lstrip("/")
-    return "1"
+            return state
+    return "/1"
 
 
 def main():

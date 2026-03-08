@@ -28,47 +28,47 @@
     "tax_year_end_year": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_3[0]",
     "entity_type_decedents_estate": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_1[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_simple_trust": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_2[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_complex_trust": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_3[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_qualified_disability_trust": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_4[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_esbt": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_5[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_grantor_trust": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_6[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_bankruptcy_ch7": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_7[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_bankruptcy_ch11": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_8[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "entity_type_pooled_income_fund": {
       "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_9[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "num_schedules_k1": "topmostSubform[0].Page1[0].LinesA-B[0].f1_12[0]",
@@ -77,98 +77,98 @@
     "g2_trust_tin": "topmostSubform[0].Page1[0].f1_15[0]",
     "line_e_sec_4947a1": {
       "field_id": "topmostSubform[0].Page1[0].LinesC-E[0].c1_10[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "line_e_sec_4947a2": {
       "field_id": "topmostSubform[0].Page1[0].LinesC-E[0].c1_11[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "line_g1_sec645_election": {
       "field_id": "topmostSubform[0].Page1[0].LinesC-E[0].c1_12[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "initial_return": {
       "field_id": "topmostSubform[0].Page1[0].c1_13[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "final_return": {
       "field_id": "topmostSubform[0].Page1[0].c1_14[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "amended_return": {
       "field_id": "topmostSubform[0].Page1[0].c1_15[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "nol_carryback": {
       "field_id": "topmostSubform[0].Page1[0].c1_16[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "change_in_trust_name": {
       "field_id": "topmostSubform[0].Page1[0].c1_17[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "change_in_fiduciary": {
       "field_id": "topmostSubform[0].Page1[0].c1_18[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "change_in_fiduciary_name": {
       "field_id": "topmostSubform[0].Page1[0].c1_19[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "change_in_fiduciary_address": {
       "field_id": "topmostSubform[0].Page1[0].c1_20[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox"
     },
     "line_f_additional_cb1": {
       "field_id": "topmostSubform[0].Page1[0].c1_21[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox",
       "_note": "Verify exact Line F position against form \u00e2\u20ac\u201d 9th or extra checkbox beyond 8 Line F items"
     },
     "line_f_additional_cb2": {
       "field_id": "topmostSubform[0].Page1[0].c1_22[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox",
       "_note": "Verify exact Line F position against form"
     },
     "discuss_with_preparer_yes": {
       "field_id": "topmostSubform[0].Page1[0].c1_23[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox",
       "_note": "IRS discuss with preparer \u00e2\u20ac\u201d Yes option"
     },
     "discuss_with_preparer_no": {
       "field_id": "topmostSubform[0].Page1[0].c1_23[1]",
-      "on_state": "2",
+      "on_state": "/2",
       "field_type": "checkbox",
       "_note": "IRS discuss with preparer \u00e2\u20ac\u201d No option"
     },
     "preparer_check_if_self_employed": {
       "field_id": "topmostSubform[0].Page1[0].c1_24[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox",
       "_note": "Preparer self-employed checkbox \u00e2\u20ac\u201d verify position"
     },
     "line_g2_trust_tin_or_extra_cb": {
       "field_id": "topmostSubform[0].Page1[0].c1_24[1]",
-      "on_state": "2",
+      "on_state": "/2",
       "field_type": "checkbox",
       "_note": "Verify exact purpose \u00e2\u20ac\u201d may be a second Yes/No option"
     },
     "line_extra_cb25": {
       "field_id": "topmostSubform[0].Page1[0].c1_25[0]",
-      "on_state": "1",
+      "on_state": "/1",
       "field_type": "checkbox",
       "_note": "Verify exact purpose against form visual"
     },
