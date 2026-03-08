@@ -881,11 +881,12 @@ def main():
     # 9. Output paths and form PDFs
     year = args.year
     output_dir = Path(args.output_dir)
+    entity_name = cfg.get("trust", {}).get("name", "Trust")
     output_paths = {
-        "form_1041":   output_dir / f"{year}_1041_filled.pdf",
-        "schedule_d":  output_dir / f"{year}_sched_d_filled.pdf",
-        "form_8960":   output_dir / f"{year}_8960_filled.pdf",
-        "form_8949":   output_dir / f"{year}_8949_filled.pdf",
+        "form_1041":   output_dir / f"{year} 1041 {entity_name}.pdf",
+        "schedule_d":  output_dir / f"{year} Schedule D {entity_name}.pdf",
+        "form_8960":   output_dir / f"{year} 8960 {entity_name}.pdf",
+        "form_8949":   output_dir / f"{year} 8949 {entity_name}.pdf",
     }
     form_pdfs = {
         "form_1041":  cfg["paths"]["blank_form"],   # forms/f1041.pdf
