@@ -71,6 +71,7 @@ completed: 2026-03-08
 
 1. **Task 1: Download IRS PDFs and extend field catalog** - `3431428` (feat)
 2. **Task 2: Create fill_1041.py with arg parsing and CSV parser** - `0fb3547` (feat)
+3. **Fix: Remove dead b_col_headers_seen variable and unused subprocess import** - `10d0d49` (fix)
 
 ## Files Created/Modified
 
@@ -115,7 +116,7 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - Ready for Plan 02 (tax computation engine): all field IDs are real, fill_pdf.py interface is unchanged, CSV parser delivers correctly structured data
-- Awaiting human verification at checkpoint (confirm field catalog and dry-run output correct)
+- Human verification checkpoint passed: field catalog confirmed correct, PDFs present in forms/, dry-run output matches expected values
 - Concern: Schedule D Part III/IV field mappings are documented by position; verify against physical form before committing to fill logic in Plan 02
 
 ---
