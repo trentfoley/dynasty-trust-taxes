@@ -10,7 +10,9 @@ Python executable: /c/ProgramData/miniconda3/python (NOT python3 -- Windows Stor
 import argparse
 import csv
 import json
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -628,6 +630,51 @@ def print_summary(page1, sched_g, form_8960, output_paths):
 
 
 # ---------------------------------------------------------------------------
+# PDF fill helper
+# ---------------------------------------------------------------------------
+
+def fill_form(field_values, form_path, output_path):
+    """Write field_values to a temp JSON file and call fill_pdf.py via subprocess.
+
+    Args:
+        field_values: dict of {field_id: value} pairs
+        form_path: path to the blank PDF form (str or Path)
+        output_path: path for the filled output PDF (str or Path)
+
+    Raises:
+        RuntimeError: if fill_pdf.py exits non-zero, including stderr text
+    """
+    # Use sys.executable so subprocess inherits the same Python interpreter
+    # (the hardcoded Unix-style path /c/ProgramData/miniconda3/python does not
+    # work with Windows subprocess.run even though it is valid in bash).
+    python_exe = sys.executable
+    tmp = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, encoding="utf-8"
+        ) as f:
+            json.dump(field_values, f)
+            tmp = f.name
+
+        result = subprocess.run(
+            [python_exe, "fill_pdf.py", "--fields", tmp, "--form", str(form_path), "--output", str(output_path)],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"fill_pdf.py failed (exit {result.returncode}): {result.stderr.strip()}"
+            )
+        print(f"PDF written: {output_path}")
+    finally:
+        if tmp:
+            try:
+                Path(tmp).unlink()
+            except OSError:
+                pass
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -705,14 +752,74 @@ def main():
     else:
         print("Validation passed")
 
-    # 8. Dry-run: print full computation steps + field-value mapping then exit
+    # 8. Build merged computed dict and field maps (needed by both dry-run and live mode)
+    computed = {**csv_data, **page1}
+    computed.update({
+        "sched_b_adjusted_total_income": sched_b["adjusted_total_income"],
+        "income_required_to_be_distributed": sched_b["income_required_to_be_distributed"],
+        "other_amounts_distributed": sched_b["other_amounts_distributed"],
+        "total_distributions": sched_b["total_distributions"],
+        "distributable_net_income": sched_b["distributable_net_income"],
+        "income_distribution_deduction": sched_b["income_distribution_deduction"],
+    })
+    computed.update(sched_g)
+    computed.update({
+        "f8960_interest": form_8960["interest_income"],
+        "f8960_dividends": form_8960["ordinary_dividends"],
+        "net_gain_from_dispositions": form_8960["net_gain_from_dispositions"],
+        "total_nii": form_8960["total_nii"],
+        "agi_undistributed_nii": form_8960["agi_undistributed_nii"],
+        "niit_threshold": form_8960["niit_threshold"],
+        "agi_minus_threshold": form_8960["agi_minus_threshold"],
+        "lesser_of_nii_or_agi_excess": form_8960["lesser_of_nii_or_agi_excess"],
+        "niit_amount": form_8960["niit_amount"],
+        "total_tax": sched_g["tax_on_taxable_income"] + form_8960["niit_amount"],
+    })
+    computed.update({
+        "st_proceeds": sched_d["st_proceeds"],
+        "st_cost": sched_d["st_cost"],
+        "st_wash_sale": sched_d["st_wash_sale"],
+        "st_net": sched_d["st_net"],
+        "lt_proceeds": sched_d["lt_proceeds"],
+        "lt_cost": sched_d["lt_cost"],
+        "lt_wash_sale": sched_d["lt_wash_sale"],
+        "lt_net": sched_d["lt_net"],
+        "net_combined": sched_d["net_combined"],
+        "rows": sched_d["rows"],
+    })
+    field_maps = build_field_maps(computed, fields)
+
+    # 9. Output paths and form PDFs
+    year = args.year
+    output_dir = Path(args.output_dir)
+    output_paths = {
+        "form_1041":   output_dir / f"{year}_1041_filled.pdf",
+        "schedule_d":  output_dir / f"{year}_sched_d_filled.pdf",
+        "form_8960":   output_dir / f"{year}_8960_filled.pdf",
+        "form_8949":   output_dir / f"{year}_8949_filled.pdf",
+    }
+    form_pdfs = {
+        "form_1041":  cfg["paths"]["blank_form"],   # forms/f1041.pdf
+        "schedule_d": "forms/f1041sd.pdf",
+        "form_8960":  "forms/f8960.pdf",
+        "form_8949":  "forms/f8949.pdf",
+    }
+
+    # 10. Dry-run: print full computation steps + field-value mapping then exit
     if args.dry_run:
         _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields)
         sys.exit(0)
 
-    # 9. Live mode (not yet implemented)
-    print("Live mode not yet implemented", file=sys.stderr)
-    sys.exit(1)
+    # 11. Live mode: write filled PDFs
+    for form_key in ["form_1041", "schedule_d", "form_8960", "form_8949"]:
+        fmap = field_maps[form_key]
+        if not fmap:
+            print(f"WARNING: No AcroForm fields for {form_key} -- skipping PDF output")
+            continue
+        fill_form(fmap, form_pdfs[form_key], output_paths[form_key])
+
+    # 12. Print summary
+    print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()])
 
 
 def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields):
