@@ -23,7 +23,7 @@
 
 ### PDF Infrastructure (Phase 1)
 
-- [ ] **PDF-01**: AcroForm field names are discovered from blank `forms/f1041.pdf` via `pypdf PdfReader.get_fields()` and stored in `config/YEAR_fields.json`
+- [x] **PDF-01**: AcroForm field names are discovered from blank `forms/f1041.pdf` via `pypdf PdfReader.get_fields()` and stored in `config/YEAR_fields.json`
 - [x] **PDF-FILLER**: `fill_pdf.py` accepts `--fields <json>` and `--form <blank_pdf>` and writes a filled PDF with `NeedAppearances` set — this script is the only maintained Python artifact
 
 ### PDF Output (Phase 2)
@@ -70,7 +70,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CALC-06 | Phase 1 | Complete |
-| PDF-01 | Phase 1 | Pending |
+| PDF-01 | Phase 1 | Complete |
 | PDF-FILLER | Phase 1 | Complete |
 | PARSE-01 | Phase 2 | Pending |
 | PARSE-02 | Phase 2 | Pending |
