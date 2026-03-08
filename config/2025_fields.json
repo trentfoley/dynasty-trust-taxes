@@ -1,0 +1,376 @@
+{
+  "_metadata": {
+    "source_pdf": "forms/f1041.pdf",
+    "enumerated_via": "pypdf PdfReader.get_fields()",
+    "total_pdf_fields": 184,
+    "tax_year": 2025,
+    "notes": [
+      "All field IDs are full hierarchical AcroForm keys required by pypdf PdfWriter.",
+      "Text fields use plain string values: semantic_name -> full_field_id.",
+      "Checkbox fields use object values with field_id, on_state, and field_type.",
+      "schedule_d and form_8960 are SEPARATE PDF forms — not embedded in f1041.pdf.",
+      "schedule_d and form_8960 sections document the semantic intent for Phase 2 computation; field IDs marked _note indicate the field is on a separate form.",
+      "Schedule G line 5 references Form 8960 line 21 (trust NIIT line, not individual line 11)."
+    ]
+  },
+  "form_1041_page1": {
+    "_note": "Page 1 of forms/f1041.pdf. Fields f1_1 through f1_60 plus checkbox groups.",
+    "trust_name": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_1[0]",
+    "fiduciary_name_title": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_2[0]",
+    "address_street": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_3[0]",
+    "address_room_suite": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_4[0]",
+    "address_city": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_5[0]",
+    "address_state": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_6[0]",
+    "address_country": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_7[0]",
+    "address_zip": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_8[0]",
+    "tax_year_begin": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_9[0]",
+    "tax_year_end": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_10[0]",
+    "tax_year_end_year": "topmostSubform[0].Page1[0].DateNameAddress_ReadOrder[0].f1_11[0]",
+    "entity_type_decedents_estate": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_1[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_simple_trust": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_2[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_complex_trust": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_3[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_qualified_disability_trust": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_4[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_esbt": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_5[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_grantor_trust": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_6[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_bankruptcy_ch7": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_7[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_bankruptcy_ch11": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_8[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "entity_type_pooled_income_fund": {
+      "field_id": "topmostSubform[0].Page1[0].LinesA-B[0].c1_9[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "num_schedules_k1": "topmostSubform[0].Page1[0].LinesA-B[0].f1_12[0]",
+    "ein": "topmostSubform[0].Page1[0].LinesC-E[0].f1_13[0]",
+    "date_entity_created": "topmostSubform[0].Page1[0].LinesC-E[0].f1_14[0]",
+    "line_e_sec_4947a1": {
+      "field_id": "topmostSubform[0].Page1[0].LinesC-E[0].c1_10[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "line_e_sec_4947a2": {
+      "field_id": "topmostSubform[0].Page1[0].LinesC-E[0].c1_11[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "line_g1_sec645_election": {
+      "field_id": "topmostSubform[0].Page1[0].LinesC-E[0].c1_12[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "initial_return": {
+      "field_id": "topmostSubform[0].Page1[0].c1_13[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "final_return": {
+      "field_id": "topmostSubform[0].Page1[0].c1_14[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "amended_return": {
+      "field_id": "topmostSubform[0].Page1[0].c1_15[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "nol_carryback": {
+      "field_id": "topmostSubform[0].Page1[0].c1_16[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "change_in_trust_name": {
+      "field_id": "topmostSubform[0].Page1[0].c1_17[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "change_in_fiduciary": {
+      "field_id": "topmostSubform[0].Page1[0].c1_18[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "change_in_fiduciary_name": {
+      "field_id": "topmostSubform[0].Page1[0].c1_19[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "change_in_fiduciary_address": {
+      "field_id": "topmostSubform[0].Page1[0].c1_20[0]",
+      "on_state": "1",
+      "field_type": "checkbox"
+    },
+    "line_f_additional_cb1": {
+      "field_id": "topmostSubform[0].Page1[0].c1_21[0]",
+      "on_state": "1",
+      "field_type": "checkbox",
+      "_note": "Verify exact Line F position against form — 9th or extra checkbox beyond 8 Line F items"
+    },
+    "line_f_additional_cb2": {
+      "field_id": "topmostSubform[0].Page1[0].c1_22[0]",
+      "on_state": "1",
+      "field_type": "checkbox",
+      "_note": "Verify exact Line F position against form"
+    },
+    "discuss_with_preparer_yes": {
+      "field_id": "topmostSubform[0].Page1[0].c1_23[0]",
+      "on_state": "1",
+      "field_type": "checkbox",
+      "_note": "IRS discuss with preparer — Yes option"
+    },
+    "discuss_with_preparer_no": {
+      "field_id": "topmostSubform[0].Page1[0].c1_23[1]",
+      "on_state": "2",
+      "field_type": "checkbox",
+      "_note": "IRS discuss with preparer — No option"
+    },
+    "preparer_check_if_self_employed": {
+      "field_id": "topmostSubform[0].Page1[0].c1_24[0]",
+      "on_state": "1",
+      "field_type": "checkbox",
+      "_note": "Preparer self-employed checkbox — verify position"
+    },
+    "line_g2_trust_tin_or_extra_cb": {
+      "field_id": "topmostSubform[0].Page1[0].c1_24[1]",
+      "on_state": "2",
+      "field_type": "checkbox",
+      "_note": "Verify exact purpose — may be a second Yes/No option"
+    },
+    "line_extra_cb25": {
+      "field_id": "topmostSubform[0].Page1[0].c1_25[0]",
+      "on_state": "1",
+      "field_type": "checkbox",
+      "_note": "Verify exact purpose against form visual"
+    },
+    "interest_income": "topmostSubform[0].Page1[0].f1_15[0]",
+    "ordinary_dividends": "topmostSubform[0].Page1[0].f1_16[0]",
+    "qualified_dividends_beneficiaries": "topmostSubform[0].Page1[0].f1_17[0]",
+    "qualified_dividends_estate_or_trust": "topmostSubform[0].Page1[0].f1_18[0]",
+    "business_income": "topmostSubform[0].Page1[0].f1_19[0]",
+    "capital_gain_loss": "topmostSubform[0].Page1[0].f1_20[0]",
+    "rents_royalties_partnerships": "topmostSubform[0].Page1[0].f1_21[0]",
+    "farm_income": "topmostSubform[0].Page1[0].f1_22[0]",
+    "ordinary_gain_loss": "topmostSubform[0].Page1[0].f1_23[0]",
+    "other_income_description": "topmostSubform[0].Page1[0].f1_24[0]",
+    "other_income_amount": "topmostSubform[0].Page1[0].f1_25[0]",
+    "total_income": "topmostSubform[0].Page1[0].f1_26[0]",
+    "interest_deduction": "topmostSubform[0].Page1[0].f1_27[0]",
+    "taxes": "topmostSubform[0].Page1[0].f1_28[0]",
+    "fiduciary_fees": "topmostSubform[0].Page1[0].f1_29[0]",
+    "charitable_deduction": "topmostSubform[0].Page1[0].f1_30[0]",
+    "attorney_accountant_fees": "topmostSubform[0].Page1[0].f1_31[0]",
+    "other_deductions": "topmostSubform[0].Page1[0].f1_32[0]",
+    "nol_deduction": "topmostSubform[0].Page1[0].f1_33[0]",
+    "total_deductions": "topmostSubform[0].Page1[0].f1_34[0]",
+    "adjusted_total_income": "topmostSubform[0].Page1[0].f1_35[0]",
+    "income_distribution_deduction": "topmostSubform[0].Page1[0].f1_36[0]",
+    "estate_tax_deduction": "topmostSubform[0].Page1[0].f1_37[0]",
+    "qbi_deduction": "topmostSubform[0].Page1[0].f1_38[0]",
+    "exemption": "topmostSubform[0].Page1[0].f1_39[0]",
+    "deductions_total_lines18_21": "topmostSubform[0].Page1[0].f1_40[0]",
+    "taxable_income": "topmostSubform[0].Page1[0].f1_41[0]",
+    "total_tax_from_schedule_g": "topmostSubform[0].Page1[0].f1_42[0]",
+    "net_965_tax": "topmostSubform[0].Page1[0].f1_43[0]",
+    "sec1062_installment": "topmostSubform[0].Page1[0].f1_44[0]",
+    "total_payments": "topmostSubform[0].Page1[0].f1_45[0]",
+    "estimated_tax_penalty": "topmostSubform[0].Page1[0].f1_46[0]",
+    "tax_due": "topmostSubform[0].Page1[0].f1_47[0]",
+    "overpayment": "topmostSubform[0].Page1[0].f1_48[0]",
+    "credited_to_next_year": "topmostSubform[0].Page1[0].f1_49[0]",
+    "refund_amount": "topmostSubform[0].Page1[0].f1_50[0]",
+    "refund_routing_number": "topmostSubform[0].Page1[0].f1_51[0]",
+    "refund_routing_number_comb": "topmostSubform[0].Page1[0].Line30cCombfield[0].f1_52[0]",
+    "refund_account_number": "topmostSubform[0].Page1[0].Line30eCombfield[0].f1_53[0]",
+    "sign_date": "topmostSubform[0].Page1[0].f1_54[0]",
+    "sign_ein_financial_institution": "topmostSubform[0].Page1[0].f1_55[0]",
+    "preparer_name": "topmostSubform[0].Page1[0].f1_56[0]",
+    "preparer_date": "topmostSubform[0].Page1[0].f1_57[0]",
+    "preparer_ptin": "topmostSubform[0].Page1[0].f1_58[0]",
+    "firm_name": "topmostSubform[0].Page1[0].f1_59[0]",
+    "firm_ein": "topmostSubform[0].Page1[0].f1_60[0]"
+  },
+  "schedule_b": {
+    "_note": "Schedule B is on Page 2 of forms/f1041.pdf. Fields f2_8 through f2_22.",
+    "schedule_a_line1": "topmostSubform[0].Page2[0].f2_1[0]",
+    "schedule_a_line2": "topmostSubform[0].Page2[0].f2_2[0]",
+    "schedule_a_line3": "topmostSubform[0].Page2[0].f2_3[0]",
+    "schedule_a_line4": "topmostSubform[0].Page2[0].f2_4[0]",
+    "schedule_a_line5": "topmostSubform[0].Page2[0].f2_5[0]",
+    "schedule_a_line6": "topmostSubform[0].Page2[0].f2_6[0]",
+    "schedule_a_charitable_deduction": "topmostSubform[0].Page2[0].f2_7[0]",
+    "adjusted_total_income": "topmostSubform[0].Page2[0].f2_8[0]",
+    "adjusted_tax_exempt_interest": "topmostSubform[0].Page2[0].f2_9[0]",
+    "total_net_gain_from_schedule_d": "topmostSubform[0].Page2[0].f2_10[0]",
+    "amount_from_schedule_a_line4": "topmostSubform[0].Page2[0].f2_11[0]",
+    "capital_gains_on_schedule_a_line1": "topmostSubform[0].Page2[0].f2_12[0]",
+    "gain_from_page1_line4": "topmostSubform[0].Page2[0].f2_13[0]",
+    "distributable_net_income": "topmostSubform[0].Page2[0].f2_14[0]",
+    "accounting_income": "topmostSubform[0].Page2[0].f2_15[0]",
+    "income_required_to_be_distributed": "topmostSubform[0].Page2[0].f2_16[0]",
+    "other_amounts_distributed": "topmostSubform[0].Page2[0].f2_17[0]",
+    "total_distributions": "topmostSubform[0].Page2[0].f2_18[0]",
+    "tax_exempt_income_in_distributions": "topmostSubform[0].Page2[0].f2_19[0]",
+    "tentative_idd_line13": "topmostSubform[0].Page2[0].f2_20[0]",
+    "tentative_idd_line14": "topmostSubform[0].Page2[0].f2_21[0]",
+    "income_distribution_deduction": "topmostSubform[0].Page2[0].f2_22[0]"
+  },
+  "schedule_d": {
+    "_note": "Schedule D (Form 1041) is a SEPARATE PDF form — not part of forms/f1041.pdf. The f1041.pdf page 1 Line 4 field (capital_gain_loss) receives the net capital gain/loss total that carries over from Schedule D. The fields below document the semantic intent for Phase 2 computation. No AcroForm field IDs are listed here because Schedule D is filled on its own PDF.",
+    "short_term_proceeds": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part I, Column (d) — total proceeds from short-term transactions"
+    },
+    "short_term_cost": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part I, Column (e) — total cost or basis for short-term transactions"
+    },
+    "short_term_wash_sale_disallowed": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part I, Column (g) — wash sale loss disallowed"
+    },
+    "net_short_term_gain_loss": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part I Line 7 — net short-term gain/(loss); this total feeds into Schedule B line 3 and ultimately page 1 line 4"
+    },
+    "long_term_proceeds": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part II, Column (d) — total proceeds from long-term transactions"
+    },
+    "long_term_cost": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part II, Column (e) — total cost or basis for long-term transactions"
+    },
+    "net_long_term_gain_loss": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part II Line 15 — net long-term gain/(loss)"
+    },
+    "net_capital_gain": {
+      "field_id": null,
+      "on_separate_form": "Schedule D (Form 1041)",
+      "_note": "Part III Line 19 — combined net capital gain/loss; this is the value that flows to Form 1041 page 1 Line 4 and Schedule B Line 3"
+    },
+    "capital_gain_on_form1041_page1": "topmostSubform[0].Page1[0].f1_20[0]",
+    "_page1_cross_reference": "Capital gain/loss total from Schedule D flows to Form 1041 page 1 Line 4 = f1_20[0]"
+  },
+  "schedule_g": {
+    "_note": "Schedule G is on Pages 2-3 of forms/f1041.pdf. Part I is on Page 2 (f2_23 through f2_41). Part II is on Page 3 (f3_1 through f3_10). Note: Line 5 references Form 8960 line 21 (trust NIIT line).",
+    "tax_on_taxable_income": "topmostSubform[0].Page2[0].Ln1a_ReadOrder[0].f2_23[0]",
+    "tax_lump_sum_distributions": "topmostSubform[0].Page2[0].f2_24[0]",
+    "alternative_minimum_tax": "topmostSubform[0].Page2[0].f2_25[0]",
+    "form_4255_column_q": "topmostSubform[0].Page2[0].f2_26[0]",
+    "total_tax_lines1a_1d": "topmostSubform[0].Page2[0].f2_27[0]",
+    "foreign_tax_credit": "topmostSubform[0].Page2[0].f2_28[0]",
+    "general_business_credit": "topmostSubform[0].Page2[0].f2_29[0]",
+    "credit_prior_year_min_tax": "topmostSubform[0].Page2[0].f2_30[0]",
+    "bond_credits": "topmostSubform[0].Page2[0].f2_31[0]",
+    "total_credits": "topmostSubform[0].Page2[0].f2_32[0]",
+    "tax_after_credits": "topmostSubform[0].Page2[0].f2_33[0]",
+    "esbt_tax": "topmostSubform[0].Page2[0].f2_34[0]",
+    "niit_form_8960_line21": "topmostSubform[0].Page2[0].f2_35[0]",
+    "form_4255_column_r": "topmostSubform[0].Page2[0].f2_36[0]",
+    "recapture_tax_form8611": "topmostSubform[0].Page2[0].f2_37[0]",
+    "other_recapture_taxes": "topmostSubform[0].Page2[0].f2_38[0]",
+    "household_employment_taxes": "topmostSubform[0].Page2[0].f2_39[0]",
+    "other_taxes_and_amounts_due": "topmostSubform[0].Page2[0].f2_40[0]",
+    "total_tax": "topmostSubform[0].Page2[0].f2_41[0]",
+    "part2_estimated_tax_payments": "topmostSubform[0].Page3[0].f3_1[0]",
+    "part2_est_tax_allocated_to_beneficiaries": "topmostSubform[0].Page3[0].f3_2[0]",
+    "part2_est_tax_after_beneficiary_allocation": "topmostSubform[0].Page3[0].f3_3[0]",
+    "part2_tax_paid_with_form_7004": "topmostSubform[0].Page3[0].f3_4[0]",
+    "part2_federal_income_tax_withheld": "topmostSubform[0].Page3[0].f3_5[0]",
+    "part2_net_965_liability": "topmostSubform[0].Page3[0].f3_6[0]",
+    "part2_payments_form_2439": "topmostSubform[0].Page3[0].f3_7[0]",
+    "part2_payments_form_4136": "topmostSubform[0].Page3[0].f3_8[0]",
+    "part2_elective_payment_form_3800": "topmostSubform[0].Page3[0].f3_9[0]",
+    "part2_other_credits_payments": "topmostSubform[0].Page3[0].f3_10[0]",
+    "part2_sec1062_net_tax_liability": "topmostSubform[0].Page3[0].f3_11[0]",
+    "part2_total_payments": "topmostSubform[0].Page3[0].f3_12[0]",
+    "_part2_note": "Page 3 has 14 text fields total; f3_11 through f3_13 may be additional Part II lines or Other Information fields. f3_14 is in SeeInstructions_ReadOrder container (likely Other Information line 3 foreign country or line 13 digital asset text)."
+  },
+  "form_8960": {
+    "_note": "Form 8960 (Net Investment Income Tax) is a SEPARATE PDF form — not embedded in forms/f1041.pdf. For trusts, the key output is Form 8960 line 21 (NIIT amount), which flows to Schedule G line 5 (field f2_35[0] in forms/f1041.pdf). The fields below document the semantic computation structure for Phase 2. Phase 2 will compute NIIT manually and enter the result into schedule_g.niit_form_8960_line21.",
+    "interest_income": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 1 — interest income included in NII"
+    },
+    "ordinary_dividends": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 2 — ordinary dividends included in NII"
+    },
+    "net_gain_loss_from_dispositions": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 5b or 5c — net gain/loss from disposition of property (capital gains)"
+    },
+    "total_net_investment_income": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 8 — total net investment income (sum of NII components)"
+    },
+    "agi_undistributed_net_income": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 9b — for trusts: undistributed net investment income"
+    },
+    "niit_threshold": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 9c — dollar threshold for trust NIIT ($15,650 for 2025, from config/2025.json niit.threshold)"
+    },
+    "agi_minus_threshold": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 9d — Line 9b minus Line 9c"
+    },
+    "lesser_of_nii_or_agi_excess": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 10 — lesser of Line 8 or Line 9d"
+    },
+    "niit_amount": {
+      "field_id": null,
+      "on_separate_form": "Form 8960",
+      "_note": "Line 21 — 3.8% of Line 10; this is the value that flows to Schedule G line 5 in forms/f1041.pdf"
+    },
+    "niit_on_form1041_schedule_g": "topmostSubform[0].Page2[0].f2_35[0]",
+    "_form1041_cross_reference": "Form 8960 line 21 NIIT flows to Schedule G line 5 = f2_35[0] in forms/f1041.pdf"
+  }
+}
