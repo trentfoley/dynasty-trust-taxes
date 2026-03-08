@@ -285,8 +285,8 @@
       "on_separate_form": "Schedule D (Form 1041)",
       "_note": "Part III Line 19 \u00e2\u20ac\u201d combined net capital gain/loss; this is the value that flows to Form 1041 page 1 Line 4 and Schedule B Line 3"
     },
-    "capital_gain_on_form1041_page1": "topmostSubform[0].Page1[0].f1_20[0]",
-    "_page1_cross_reference": "Capital gain/loss total from Schedule D flows to Form 1041 page 1 Line 4 = f1_20[0]"
+    "capital_gain_on_form1041_page1": "topmostSubform[0].Page1[0].f1_21[0]",
+    "_page1_cross_reference": "Capital gain/loss total from Schedule D flows to Form 1041 page 1 Line 4 = f1_21[0]"
   },
   "schedule_g": {
     "_note": "Schedule G is on Pages 2-3 of forms/f1041.pdf. Part I is on Page 2 (f2_23 through f2_41). Part II is on Page 3 (f3_1 through f3_10). Note: Line 5 references Form 8960 line 21 (trust NIIT line).",
