@@ -49,18 +49,20 @@ Given a brokerage year-end CSV and a blank Form 1041 PDF, produce a complete, fi
 
 ## Constraints
 
-- **Tech stack**: Python — standard for PDF manipulation and CSV parsing on Windows
+- **Primary tool**: Claude skill — Claude handles all intelligence (CSV parsing, tax computation, field mapping)
+- **PDF writing**: Thin Python script (`fill_pdf.py`) — the only maintained Python artifact; takes a field-value JSON and writes the filled PDF
 - **PDF filling**: Must use AcroForm field names from the IRS PDF (not recreate the form)
-- **Year-agnostic**: Field mappings and tax bracket logic must be parameterized by tax year
+- **Year-agnostic**: Field mappings and tax bracket logic are parameterized by tax year via `config/YEAR.json`
 - **No external services**: Runs entirely locally — no API calls, no cloud
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Use brokerage CSV as primary data source | Structured, machine-readable; XML/PDF are fallbacks | — Pending |
-| Fill existing IRS PDF via AcroForm | Preserves official form appearance; IRS PDFs support AcroForms | — Pending |
-| Python as implementation language | Best library support for PDF manipulation and CSV parsing on Windows | — Pending |
+| Claude skill as primary implementation | Simpler than a maintained Python codebase; Claude does the heavy lifting | Decided |
+| Use brokerage CSV as primary data source | Structured, machine-readable; XML/PDF are fallbacks | Decided |
+| Fill existing IRS PDF via AcroForm | Preserves official form appearance; IRS PDFs support AcroForms | Decided |
+| Python only for thin PDF filler | pypdf is the right tool for AcroForm writing; everything else Claude handles | Decided |
 
 ---
 *Last updated: 2026-03-08 after initialization*
