@@ -211,6 +211,393 @@ def parse_csv(csv_path):
 
 
 # ---------------------------------------------------------------------------
+# Computation functions
+# ---------------------------------------------------------------------------
+
+def compute_schedule_d(transactions):
+    """Net short-term and long-term capital gains from 1099-B transactions.
+
+    For each transaction: adjusted_cost = cost + wash_sale (IRS Form 8949 Box 1g).
+    gain_loss = proceeds - adjusted_cost.
+    Short-term: form8949_code == 'A'. Long-term: form8949_code == 'D'.
+
+    Returns dict with st/lt proceeds, cost, wash_sale, net, net_combined, and rows.
+    """
+    st_proceeds = 0.0
+    st_cost = 0.0
+    st_wash_sale = 0.0
+    lt_proceeds = 0.0
+    lt_cost = 0.0
+    lt_wash_sale = 0.0
+    rows = []
+
+    for txn in transactions:
+        adjusted_cost = txn["cost"] + txn["wash_sale"]
+        gain_loss = txn["proceeds"] - adjusted_cost
+        row = dict(txn)
+        row["gain_loss"] = gain_loss
+        rows.append(row)
+
+        if txn["form8949_code"] == "A":
+            st_proceeds += txn["proceeds"]
+            st_cost += txn["cost"]
+            st_wash_sale += txn["wash_sale"]
+        elif txn["form8949_code"] == "D":
+            lt_proceeds += txn["proceeds"]
+            lt_cost += txn["cost"]
+            lt_wash_sale += txn["wash_sale"]
+
+    st_net = st_proceeds - (st_cost + st_wash_sale)
+    lt_net = lt_proceeds - (lt_cost + lt_wash_sale)
+    net_combined = st_net + lt_net
+
+    return {
+        "st_proceeds": st_proceeds,
+        "st_cost": st_cost,
+        "st_wash_sale": st_wash_sale,
+        "st_net": round(st_net, 2),
+        "lt_proceeds": lt_proceeds,
+        "lt_cost": lt_cost,
+        "lt_wash_sale": lt_wash_sale,
+        "lt_net": round(lt_net, 2),
+        "net_combined": round(net_combined, 2),
+        "rows": rows,
+    }
+
+
+def compute_form_1041_page1(csv_data, sched_d, cfg):
+    """Compute all Form 1041 Page 1 values.
+
+    Note: total_income uses ordinary dividends (qualified dividends is a subset
+    already included in ordinary dividends — do not double-count).
+    """
+    exemption = cfg.get("trust_exemption", cfg.get("trust", {}).get("exemption", 100))
+    interest = csv_data["int_box1"]
+    ordinary_dividends = csv_data["div_1a"]
+    qualified_dividends = csv_data["div_1b"]
+    capital_gain_loss = sched_d["net_combined"]
+    total_income = round(interest + ordinary_dividends + capital_gain_loss, 2)
+    taxable_income = round(total_income - exemption, 2)
+
+    return {
+        "interest_income": interest,
+        "ordinary_dividends": ordinary_dividends,
+        "qualified_dividends": qualified_dividends,
+        "capital_gain_loss": capital_gain_loss,
+        "total_income": total_income,
+        "exemption": float(exemption),
+        "taxable_income": taxable_income,
+    }
+
+
+def compute_schedule_b(page1):
+    """Compute Schedule B field values for a non-distributing trust.
+
+    All distribution fields are $0. Income distribution deduction is $0.
+    Distributable net income equals total income (adjusted total income).
+    """
+    return {
+        "adjusted_total_income": page1["total_income"],
+        "income_required_to_be_distributed": 0.0,
+        "other_amounts_distributed": 0.0,
+        "total_distributions": 0.0,
+        "distributable_net_income": page1["total_income"],
+        "income_distribution_deduction": 0.0,
+    }
+
+
+def compute_schedule_g(taxable_income, qual_div, lt_net_gain, cfg):
+    """Compute Schedule G Line 1a tax via QD&CG worksheet.
+
+    All bracket values come from cfg — never hardcoded.
+    Returns dict with preferential/ordinary breakdown, bucket amounts, and tax totals.
+    """
+    brackets = cfg["ordinary_income_brackets"]
+    qdcg = cfg["qdcg_worksheet"]
+
+    b10 = brackets["10_pct_max"]    # 3150
+    b24 = brackets["24_pct_max"]    # 11450
+    b35 = brackets["35_pct_max"]    # 15650
+
+    zero_max = qdcg["0_pct_max"]              # 3250
+    twenty_thresh = qdcg["20_pct_threshold"]   # 15900
+
+    preferential_income = qual_div + lt_net_gain
+    ordinary_income = max(0.0, taxable_income - preferential_income)
+
+    # Ordinary income tax (trust brackets)
+    if ordinary_income <= b10:
+        ordinary_tax = ordinary_income * 0.10
+    elif ordinary_income <= b24:
+        ordinary_tax = b10 * 0.10 + (ordinary_income - b10) * 0.24
+    elif ordinary_income <= b35:
+        ordinary_tax = b10 * 0.10 + (b24 - b10) * 0.24 + (ordinary_income - b24) * 0.35
+    else:
+        ordinary_tax = b10 * 0.10 + (b24 - b10) * 0.24 + (b35 - b24) * 0.35 + (ordinary_income - b35) * 0.37
+
+    # Capital gains / qualified dividends tax via QD&CG worksheet
+    zero_bucket = min(zero_max, taxable_income, preferential_income)
+    fifteen_bucket = max(0.0, min(twenty_thresh, taxable_income, preferential_income) - zero_bucket)
+    twenty_bucket = max(0.0, preferential_income - twenty_thresh)
+
+    cap_gains_tax = zero_bucket * 0.00 + fifteen_bucket * 0.15 + twenty_bucket * 0.20
+
+    tax_on_taxable_income = round(ordinary_tax + cap_gains_tax, 2)
+
+    return {
+        "preferential_income": round(preferential_income, 2),
+        "ordinary_income": round(ordinary_income, 2),
+        "ordinary_tax": round(ordinary_tax, 2),
+        "zero_bucket": round(zero_bucket, 2),
+        "fifteen_bucket": round(fifteen_bucket, 2),
+        "twenty_bucket": round(twenty_bucket, 2),
+        "cap_gains_tax": round(cap_gains_tax, 2),
+        "tax_on_taxable_income": tax_on_taxable_income,
+        "total_tax": tax_on_taxable_income,  # Line 9 — no other additions for this trust
+    }
+
+
+def compute_form_8960(csv_data, page1, sched_d, cfg):
+    """Compute Form 8960 Net Investment Income Tax (NIIT).
+
+    For trusts: AGI basis is undistributed net income = taxable_income.
+    NIIT = 3.8% of lesser of (total NII, taxable_income - threshold).
+    """
+    niit_cfg = cfg["niit"]
+    threshold = niit_cfg["threshold"]   # 15650
+    rate = niit_cfg["rate"]             # 0.038
+
+    interest = csv_data["int_box1"]
+    ordinary_dividends = csv_data["div_1a"]
+    net_gain = sched_d["net_combined"]
+    total_nii = round(interest + ordinary_dividends + net_gain, 2)
+
+    agi_undistributed_nii = page1["taxable_income"]
+    agi_minus_threshold = round(max(0.0, agi_undistributed_nii - threshold), 2)
+    lesser_of_nii_or_agi_excess = round(min(total_nii, agi_minus_threshold), 2)
+    niit_amount = round(lesser_of_nii_or_agi_excess * rate, 2)
+
+    return {
+        "interest_income": interest,
+        "ordinary_dividends": ordinary_dividends,
+        "net_gain_from_dispositions": net_gain,
+        "total_nii": total_nii,
+        "agi_undistributed_nii": agi_undistributed_nii,
+        "niit_threshold": float(threshold),
+        "agi_minus_threshold": agi_minus_threshold,
+        "lesser_of_nii_or_agi_excess": lesser_of_nii_or_agi_excess,
+        "niit_amount": niit_amount,
+    }
+
+
+def validate(csv_data, computed, tolerance=1.00):
+    """Compare computed income totals against CSV raw values.
+
+    Returns list of mismatch strings (empty = passed).
+    tolerance: flag if abs(diff) >= tolerance (default $1.00).
+    """
+    checks = [
+        ("ordinary_dividends", csv_data["div_1a"],  computed["div_1a"]),
+        ("qualified_dividends", csv_data["div_1b"],  computed["div_1b"]),
+        ("interest_income",     csv_data["int_box1"], computed["int_box1"]),
+        ("net_short_term_gain", csv_data.get("st_gain", 0.0), computed["st_gain"]),
+        ("net_long_term_gain",  csv_data.get("lt_gain", 0.0), computed["lt_gain"]),
+    ]
+    mismatches = []
+    for name, expected, actual in checks:
+        diff = abs(expected - actual)
+        if diff >= tolerance:
+            mismatches.append(
+                f"  {name}: expected {expected:.2f}, got {actual:.2f}, diff {diff:.2f}"
+            )
+    return mismatches
+
+
+def build_field_maps(computed, fields):
+    """Map semantic computed values to AcroForm field IDs.
+
+    Returns dict keyed by form name:
+      form_1041, schedule_d, form_8960, form_8949
+
+    Skips fields where field_id is None (null placeholders).
+    For form_1041: merges page1, schedule_b, and schedule_g (all in f1041.pdf).
+    """
+
+    def resolve(section_dict, semantic_name):
+        """Look up a field entry; return field_id string or None."""
+        entry = section_dict.get(semantic_name)
+        if entry is None:
+            return None
+        if isinstance(entry, dict):
+            return entry.get("field_id")
+        return entry  # plain string field_id
+
+    page1_fields = fields.get("form_1041_page1", {})
+    sched_b_fields = fields.get("schedule_b", {})
+    sched_g_fields = fields.get("schedule_g", {})
+    sched_d_fields = fields.get("schedule_d", {})
+    f8960_fields = fields.get("form_8960", {})
+    f8949_fields = fields.get("form_8949", {})
+
+    # ---- Form 1041 (f1041.pdf) — page1 + schedule_b + schedule_g ----
+    form_1041_map = {}
+
+    # Page 1 income fields
+    p1_mappings = {
+        "interest_income":             computed.get("interest_income"),
+        "ordinary_dividends":          computed.get("ordinary_dividends"),
+        "qualified_dividends_estate_or_trust": computed.get("qualified_dividends"),
+        "capital_gain_loss":           computed.get("capital_gain_loss"),
+        "total_income":                computed.get("total_income"),
+        "exemption":                   computed.get("exemption"),
+        "taxable_income":              computed.get("taxable_income"),
+        "total_tax_from_schedule_g":   computed.get("total_tax"),
+        "tax_due":                     computed.get("total_tax"),
+    }
+    for sem, val in p1_mappings.items():
+        fid = resolve(page1_fields, sem)
+        if fid and val is not None:
+            form_1041_map[fid] = f"{val:.2f}"
+
+    # Schedule B fields (embedded in f1041.pdf Page 2)
+    sched_b_mappings = {
+        "adjusted_total_income":                computed.get("sched_b_adjusted_total_income"),
+        "income_required_to_be_distributed":    computed.get("income_required_to_be_distributed"),
+        "other_amounts_distributed":            computed.get("other_amounts_distributed"),
+        "total_distributions":                  computed.get("total_distributions"),
+        "distributable_net_income":             computed.get("distributable_net_income"),
+        "income_distribution_deduction":        computed.get("income_distribution_deduction"),
+    }
+    for sem, val in sched_b_mappings.items():
+        fid = resolve(sched_b_fields, sem)
+        if fid and val is not None:
+            form_1041_map[fid] = f"{val:.2f}"
+
+    # Schedule G fields (embedded in f1041.pdf Pages 2-3)
+    sched_g_mappings = {
+        "tax_on_taxable_income": computed.get("tax_on_taxable_income"),
+        "niit_form_8960_line21":  computed.get("niit_amount"),
+        "total_tax":              computed.get("total_tax"),
+    }
+    for sem, val in sched_g_mappings.items():
+        fid = resolve(sched_g_fields, sem)
+        if fid and val is not None:
+            form_1041_map[fid] = f"{val:.2f}"
+
+    # ---- Schedule D (f1041sd.pdf) ----
+    schedule_d_map = {}
+    sd_mappings = {
+        "short_term_proceeds":              computed.get("st_proceeds"),
+        "short_term_cost":                  computed.get("st_cost"),
+        "short_term_wash_sale_disallowed":  computed.get("st_wash_sale"),
+        "net_short_term_gain_loss":         computed.get("st_net"),
+        "long_term_proceeds":               computed.get("lt_proceeds"),
+        "long_term_cost":                   computed.get("lt_cost"),
+        "long_term_wash_sale_disallowed":   computed.get("lt_wash_sale"),
+        "net_long_term_gain_loss":          computed.get("lt_net"),
+        "net_capital_gain":                 computed.get("net_combined"),
+    }
+    for sem, val in sd_mappings.items():
+        fid = resolve(sched_d_fields, sem)
+        if fid and val is not None:
+            schedule_d_map[fid] = f"{val:.2f}"
+
+    # ---- Form 8960 (f8960.pdf) ----
+    form_8960_map = {}
+    f8960_mappings = {
+        "interest_income":               computed.get("f8960_interest"),
+        "ordinary_dividends":            computed.get("f8960_dividends"),
+        "net_gain_loss_from_dispositions": computed.get("net_gain_from_dispositions"),
+        "total_net_investment_income":   computed.get("total_nii"),
+        "agi_undistributed_net_income":  computed.get("agi_undistributed_nii"),
+        "niit_threshold":                computed.get("niit_threshold"),
+        "agi_minus_threshold":           computed.get("agi_minus_threshold"),
+        "lesser_of_nii_or_agi_excess":   computed.get("lesser_of_nii_or_agi_excess"),
+        "niit_amount":                   computed.get("niit_amount"),
+    }
+    for sem, val in f8960_mappings.items():
+        fid = resolve(f8960_fields, sem)
+        if fid and val is not None:
+            form_8960_map[fid] = f"{val:.2f}"
+
+    # ---- Form 8949 (f8949.pdf) ----
+    form_8949_map = {}
+    # Short-term transaction (Box A) — fills Page 1 Row 1
+    st_rows = [r for r in computed.get("rows", []) if r["form8949_code"] == "A"]
+    lt_rows = [r for r in computed.get("rows", []) if r["form8949_code"] == "D"]
+
+    for i, txn in enumerate(st_rows[:11], start=1):
+        prefix = f"p1_row{i}"
+        row_map = {
+            f"{prefix}_description":  (txn["description"], str),
+            f"{prefix}_date_acquired": (txn["date_acquired"], str),
+            f"{prefix}_date_sold":     (txn["date_sold"], str),
+            f"{prefix}_proceeds":      (txn["proceeds"], lambda v: f"{v:.2f}"),
+            f"{prefix}_cost":          (txn["cost"], lambda v: f"{v:.2f}"),
+            f"{prefix}_code":          (txn["form8949_code"], str),
+            f"{prefix}_wash_sale":     (txn["wash_sale"], lambda v: f"{v:.2f}"),
+            f"{prefix}_gain_loss":     (txn["gain_loss"], lambda v: f"{v:.2f}"),
+        }
+        for sem, (val, fmt) in row_map.items():
+            fid = resolve(f8949_fields, sem)
+            if fid:
+                form_8949_map[fid] = fmt(val)
+
+    for i, txn in enumerate(lt_rows[:11], start=1):
+        prefix = f"p2_row{i}"
+        row_map = {
+            f"{prefix}_description":  (txn["description"], str),
+            f"{prefix}_date_acquired": (txn["date_acquired"], str),
+            f"{prefix}_date_sold":     (txn["date_sold"], str),
+            f"{prefix}_proceeds":      (txn["proceeds"], lambda v: f"{v:.2f}"),
+            f"{prefix}_cost":          (txn["cost"], lambda v: f"{v:.2f}"),
+            f"{prefix}_code":          (txn["form8949_code"], str),
+            f"{prefix}_wash_sale":     (txn["wash_sale"], lambda v: f"{v:.2f}"),
+            f"{prefix}_gain_loss":     (txn["gain_loss"], lambda v: f"{v:.2f}"),
+        }
+        for sem, (val, fmt) in row_map.items():
+            fid = resolve(f8949_fields, sem)
+            if fid:
+                form_8949_map[fid] = fmt(val)
+
+    # Page totals for Form 8949
+    if st_rows:
+        fid = resolve(f8949_fields, "p1_total_proceeds")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('st_proceeds', 0.0):.2f}"
+        fid = resolve(f8949_fields, "p1_total_cost")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('st_cost', 0.0):.2f}"
+        fid = resolve(f8949_fields, "p1_total_wash_sale")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('st_wash_sale', 0.0):.2f}"
+        fid = resolve(f8949_fields, "p1_total_gain_loss")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('st_net', 0.0):.2f}"
+
+    if lt_rows:
+        fid = resolve(f8949_fields, "p2_total_proceeds")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('lt_proceeds', 0.0):.2f}"
+        fid = resolve(f8949_fields, "p2_total_cost")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('lt_cost', 0.0):.2f}"
+        fid = resolve(f8949_fields, "p2_total_wash_sale")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('lt_wash_sale', 0.0):.2f}"
+        fid = resolve(f8949_fields, "p2_total_gain_loss")
+        if fid:
+            form_8949_map[fid] = f"{computed.get('lt_net', 0.0):.2f}"
+
+    return {
+        "form_1041": form_1041_map,
+        "schedule_d": schedule_d_map,
+        "form_8960": form_8960_map,
+        "form_8949": form_8949_map,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Output helpers
 # ---------------------------------------------------------------------------
 
@@ -223,6 +610,21 @@ def print_header(args, cfg):
     print(f"Blank form:   {blank_form}")
     print(f"Output dir:   {args.output_dir}")
     print(f"Mode:         {mode}")
+
+
+def print_summary(page1, sched_g, form_8960, output_paths):
+    """Print final summary block after live PDF writing (used in Plan 03)."""
+    print()
+    print("=== Summary ===")
+    print(f"Gross income:   ${page1['total_income']:,.2f}")
+    print(f"Taxable income: ${page1['taxable_income']:,.2f}")
+    print(f"Schedule G tax: ${sched_g['tax_on_taxable_income']:,.2f}")
+    print(f"NIIT:           ${form_8960['niit_amount']:,.2f}")
+    total_tax = sched_g["tax_on_taxable_income"] + form_8960["niit_amount"]
+    print(f"Total tax:      ${total_tax:,.2f}")
+    print("Output files:")
+    for path in output_paths:
+        print(f"  {path}")
 
 
 # ---------------------------------------------------------------------------
@@ -248,35 +650,233 @@ def main():
     print_header(args, cfg)
 
     # 5. Parse CSV
-    parsed = parse_csv(args.csv)
+    csv_data = parse_csv(args.csv)
     print("Parsed CSV")
 
-    # 6. Dry-run: print parsed values and exit
-    if args.dry_run:
-        div_1a = parsed["div_1a"]
-        div_1b = parsed["div_1b"]
-        int_box1 = parsed["int_box1"]
-        transactions = parsed["transactions"]
+    # 6. Computation chain
+    sched_d = compute_schedule_d(csv_data["transactions"])
+    print("Computed Schedule D")
 
-        print()
-        print("--- Parsed Values ---")
-        print(f"Ordinary dividends (1099-DIV Box 1a):  ${div_1a:.2f}")
-        print(f"Qualified dividends (1099-DIV Box 1b): ${div_1b:.2f}")
-        print(f"Interest income (1099-INT Box 1):       ${int_box1:.2f}")
-        print(f"1099-B transactions: {len(transactions)}")
-        for txn in transactions:
-            gain = txn["proceeds"] - txn["cost"] + txn["wash_sale"]
-            print(
-                f"  [{txn['term']}] acq={txn['date_acquired']} sold={txn['date_sold']}"
-                f"  proceeds=${txn['proceeds']:.2f} cost=${txn['cost']:.2f}"
-                f"  wash_sale=${txn['wash_sale']:.2f} gain=${gain:.2f}"
-                f"  code={txn['form8949_code']}"
-            )
+    page1 = compute_form_1041_page1(csv_data, sched_d, cfg)
+    sched_b = compute_schedule_b(page1)
+
+    sched_g = compute_schedule_g(
+        page1["taxable_income"],
+        csv_data["div_1b"],
+        sched_d["lt_net"],
+        cfg,
+    )
+    print("Computed Schedule G")
+
+    form_8960 = compute_form_8960(csv_data, page1, sched_d, cfg)
+    print("Computed Form 8960")
+
+    # 7. Validation — re-sum gains from raw CSV transactions for cross-check
+    raw_st_gain = sum(
+        (t["proceeds"] - t["cost"] - t["wash_sale"])
+        for t in csv_data["transactions"] if t["form8949_code"] == "A"
+    )
+    raw_lt_gain = sum(
+        (t["proceeds"] - t["cost"] - t["wash_sale"])
+        for t in csv_data["transactions"] if t["form8949_code"] == "D"
+    )
+    # Build an augmented csv_data-like dict for validate() that includes gain values
+    csv_with_gains = dict(csv_data)
+    csv_with_gains["st_gain"] = raw_st_gain
+    csv_with_gains["lt_gain"] = raw_lt_gain
+
+    mismatches = validate(csv_with_gains, {
+        "div_1a": page1["ordinary_dividends"],
+        "div_1b": page1["qualified_dividends"],
+        "int_box1": page1["interest_income"],
+        "st_gain": sched_d["st_net"],
+        "lt_gain": sched_d["lt_net"],
+    })
+    if mismatches:
+        print("VALIDATION FAILED:")
+        for m in mismatches:
+            print(m)
+        print("\nField values as computed (implicit dry-run):")
+        # fall through to print field values even on mismatch
+        # then prompt user for "yes" to proceed or halt
+        answer = input("Proceed despite mismatch? (yes/no): ").strip().lower()
+        if answer != "yes":
+            sys.exit(1)
+    else:
+        print("Validation passed")
+
+    # 8. Dry-run: print full computation steps + field-value mapping then exit
+    if args.dry_run:
+        _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields)
         sys.exit(0)
 
-    # 7. Live mode (not yet implemented)
+    # 9. Live mode (not yet implemented)
     print("Live mode not yet implemented", file=sys.stderr)
     sys.exit(1)
+
+
+def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields):
+    """Print full dry-run output: computation steps + field-value mapping."""
+
+    total_tax = sched_g["tax_on_taxable_income"] + form_8960["niit_amount"]
+
+    print()
+    print("=== Computation Steps ===")
+
+    # 1099-DIV
+    print("1099-DIV:")
+    print(f"  Ordinary dividends (Box 1a):      ${csv_data['div_1a']:,.2f}")
+    print(f"  Qualified dividends (Box 1b):     ${csv_data['div_1b']:,.2f}")
+
+    # 1099-INT
+    print("1099-INT:")
+    print(f"  Interest income (Box 1):          ${csv_data['int_box1']:,.2f}")
+
+    # 1099-B transactions
+    txns = csv_data["transactions"]
+    lt_txns = [t for t in txns if t["form8949_code"] == "D"]
+    st_txns = [t for t in txns if t["form8949_code"] == "A"]
+    print(f"1099-B ({len(txns)} transactions):")
+    for txn in lt_txns:
+        adj_cost = txn["cost"] + txn["wash_sale"]
+        gain = txn["proceeds"] - adj_cost
+        print(
+            f"  [Box D - Long term]   {txn['date_acquired']} -> {txn['date_sold']}"
+            f"   proceeds=${txn['proceeds']:,.2f}   cost=${txn['cost']:,.2f}"
+            f"   gain=${gain:,.2f}"
+        )
+    for txn in st_txns:
+        adj_cost = txn["cost"] + txn["wash_sale"]
+        gain = txn["proceeds"] - adj_cost
+        print(
+            f"  [Box A - Short term]  {txn['date_acquired']} -> {txn['date_sold']}"
+            f"   proceeds=${txn['proceeds']:,.2f}   cost=${txn['cost']:,.2f}"
+            f"   gain=${gain:,.2f}"
+        )
+
+    # Schedule D
+    print()
+    print("Schedule D:")
+    print(f"  Net short-term capital gain (Part I Line 7):   ${sched_d['st_net']:,.2f}")
+    print(f"  Net long-term capital gain (Part II Line 15):  ${sched_d['lt_net']:,.2f}")
+    print(f"  Net capital gain (Part III Line 19):           ${sched_d['net_combined']:,.2f}")
+
+    # Form 1041 Page 1
+    print()
+    print("Form 1041 Page 1:")
+    print(f"  Interest income (Line 1):         ${page1['interest_income']:,.2f}")
+    print(f"  Ordinary dividends (Line 2):      ${page1['ordinary_dividends']:,.2f}")
+    print(f"  Capital gain/loss (Line 4):       ${page1['capital_gain_loss']:,.2f}")
+    print(f"  Total income (Line 9):            ${page1['total_income']:,.2f}")
+    print(f"  Exemption (Line 20):              ${page1['exemption']:,.2f}")
+    print(f"  Taxable income (Line 22):         ${page1['taxable_income']:,.2f}")
+
+    # Schedule G
+    print()
+    print("Schedule G (QD&CG Worksheet):")
+    print(f"  Preferential income:              ${sched_g['preferential_income']:,.2f}")
+    print(f"  Ordinary income:                  ${sched_g['ordinary_income']:,.2f}")
+    print(f"  Ordinary income tax:              ${sched_g['ordinary_tax']:,.2f}")
+    print(f"  Cap gains (0% bucket):            ${sched_g['zero_bucket']:,.2f} x 0%   = $0.00")
+    fifteen_tax = sched_g["fifteen_bucket"] * 0.15
+    twenty_tax = sched_g["twenty_bucket"] * 0.20
+    print(f"  Cap gains (15% bucket):           ${sched_g['fifteen_bucket']:,.2f} x 15% = ${fifteen_tax:,.2f}")
+    print(f"  Cap gains (20% bucket):           ${sched_g['twenty_bucket']:,.2f} x 20% = ${twenty_tax:,.2f}")
+    print(f"  Schedule G Line 1a tax:           ${sched_g['tax_on_taxable_income']:,.2f}")
+
+    # Form 8960 (NIIT)
+    print()
+    print("Form 8960 (NIIT):")
+    print(f"  Total NII (Line 8):               ${form_8960['total_nii']:,.2f}")
+    print(f"  AGI / undistrib. NII (Line 9b):   ${form_8960['agi_undistributed_nii']:,.2f}")
+    print(f"  NIIT threshold (Line 9c):         ${form_8960['niit_threshold']:,.2f}")
+    print(f"  AGI minus threshold (Line 9d):    ${form_8960['agi_minus_threshold']:,.2f}")
+    print(f"  NIIT base - lesser (Line 10):     ${form_8960['lesser_of_nii_or_agi_excess']:,.2f}")
+    print(f"  NIIT (Line 21 = 3.8%):            ${form_8960['niit_amount']:,.2f}")
+
+    # Summary
+    print()
+    print("Summary:")
+    print(f"  Gross income:                     ${page1['total_income']:,.2f}")
+    print(f"  Taxable income:                   ${page1['taxable_income']:,.2f}")
+    print(f"  Schedule G tax:                   ${sched_g['tax_on_taxable_income']:,.2f}")
+    print(f"  NIIT (Form 8960 Line 21):         ${form_8960['niit_amount']:,.2f}")
+    print(f"  Total tax:                        ${total_tax:,.2f}")
+
+    # Build merged computed dict for field mapping
+    computed = {}
+    computed.update(page1)
+    computed.update({
+        "sched_b_adjusted_total_income": sched_b["adjusted_total_income"],
+        "income_required_to_be_distributed": sched_b["income_required_to_be_distributed"],
+        "other_amounts_distributed": sched_b["other_amounts_distributed"],
+        "total_distributions": sched_b["total_distributions"],
+        "distributable_net_income": sched_b["distributable_net_income"],
+        "income_distribution_deduction": sched_b["income_distribution_deduction"],
+    })
+    computed.update(sched_g)
+    computed.update({
+        "f8960_interest": form_8960["interest_income"],
+        "f8960_dividends": form_8960["ordinary_dividends"],
+        "net_gain_from_dispositions": form_8960["net_gain_from_dispositions"],
+        "total_nii": form_8960["total_nii"],
+        "agi_undistributed_nii": form_8960["agi_undistributed_nii"],
+        "niit_threshold": form_8960["niit_threshold"],
+        "agi_minus_threshold": form_8960["agi_minus_threshold"],
+        "lesser_of_nii_or_agi_excess": form_8960["lesser_of_nii_or_agi_excess"],
+        "niit_amount": form_8960["niit_amount"],
+        "total_tax": total_tax,
+    })
+    # Schedule D fields for mapping
+    computed.update({
+        "st_proceeds": sched_d["st_proceeds"],
+        "st_cost": sched_d["st_cost"],
+        "st_wash_sale": sched_d["st_wash_sale"],
+        "st_net": sched_d["st_net"],
+        "lt_proceeds": sched_d["lt_proceeds"],
+        "lt_cost": sched_d["lt_cost"],
+        "lt_wash_sale": sched_d["lt_wash_sale"],
+        "lt_net": sched_d["lt_net"],
+        "net_combined": sched_d["net_combined"],
+        "rows": sched_d["rows"],
+    })
+
+    field_maps = build_field_maps(computed, fields)
+
+    print()
+    print("=== Field-Value Mapping ===")
+
+    print()
+    print("[Form 1041 (f1041.pdf)]")
+    if field_maps["form_1041"]:
+        for fid, val in field_maps["form_1041"].items():
+            print(f"  {fid}: {val}")
+    else:
+        print("  (no fields mapped)")
+
+    print()
+    print("[Schedule D (f1041sd.pdf)]")
+    if field_maps["schedule_d"]:
+        for fid, val in field_maps["schedule_d"].items():
+            print(f"  {fid}: {val}")
+    else:
+        print("  (No AcroForm fields — XFA form, PDF fill skipped)")
+
+    print()
+    print("[Form 8960 (f8960.pdf)]")
+    if field_maps["form_8960"]:
+        for fid, val in field_maps["form_8960"].items():
+            print(f"  {fid}: {val}")
+    else:
+        print("  (no fields mapped)")
+
+    print()
+    print("[Form 8949 (f8949.pdf)]")
+    if field_maps["form_8949"]:
+        for fid, val in field_maps["form_8949"].items():
+            print(f"  {fid}: {val}")
+    else:
+        print("  (no fields mapped)")
 
 
 if __name__ == "__main__":
