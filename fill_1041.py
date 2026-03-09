@@ -339,10 +339,10 @@ def compute_schedule_g(taxable_income, qual_div, lt_net_gain, cfg):
     else:
         ordinary_tax = b10 * 0.10 + (b24 - b10) * 0.24 + (b35 - b24) * 0.35 + (ordinary_income - b35) * 0.37
 
-    # Capital gains / qualified dividends tax via QD&CG worksheet
-    zero_bucket = min(zero_max, taxable_income, preferential_income)
-    fifteen_bucket = max(0.0, min(twenty_thresh, taxable_income, preferential_income) - zero_bucket)
-    twenty_bucket = max(0.0, preferential_income - twenty_thresh)
+    # Capital gains / qualified dividends tax — ordinary income fills lower brackets first
+    zero_bucket = max(0.0, min(zero_max, taxable_income) - ordinary_income)
+    fifteen_bucket = max(0.0, min(twenty_thresh, taxable_income) - ordinary_income - zero_bucket)
+    twenty_bucket = max(0.0, preferential_income - zero_bucket - fifteen_bucket)
 
     cap_gains_tax = zero_bucket * 0.00 + fifteen_bucket * 0.15 + twenty_bucket * 0.20
 
@@ -358,6 +358,72 @@ def compute_schedule_g(taxable_income, qual_div, lt_net_gain, cfg):
         "cap_gains_tax": round(cap_gains_tax, 2),
         "tax_on_taxable_income": tax_on_taxable_income,
         "total_tax": tax_on_taxable_income,  # Line 9 — no other additions for this trust
+    }
+
+
+def compute_schedule_d_part5(taxable_income, qual_div, lt_net, net_combined, cfg):
+    """Compute Schedule D Part V: Tax Computation Using Maximum Capital Gains Rates.
+
+    Complete when both line 18a and line 19, column (2), are gains and neither
+    line 18b nor 18c exceeds zero. Result (line 45) must equal Schedule G line 1a.
+    All bracket thresholds come from cfg.
+    """
+    brackets = cfg["ordinary_income_brackets"]
+    qdcg = cfg["qdcg_worksheet"]
+    b10 = brackets["10_pct_max"]
+    b24 = brackets["24_pct_max"]
+    b35 = brackets["35_pct_max"]
+    zero_max = qdcg["0_pct_max"]
+    twenty_thresh = qdcg["20_pct_threshold"]
+
+    def _tax(income):
+        if income <= 0:
+            return 0.0
+        elif income <= b10:
+            return income * 0.10
+        elif income <= b24:
+            return b10 * 0.10 + (income - b10) * 0.24
+        elif income <= b35:
+            return b10 * 0.10 + (b24 - b10) * 0.24 + (income - b24) * 0.35
+        else:
+            return b10 * 0.10 + (b24 - b10) * 0.24 + (b35 - b24) * 0.35 + (income - b35) * 0.37
+
+    l21 = taxable_income
+    l22 = min(lt_net, net_combined)          # smaller of 18a col(2) or 19 col(2)
+    l23 = qual_div                            # Form 1041 line 2b(2)
+    l24 = l22 + l23
+    l25 = 0.0                                 # Form 4952 line 4g — not applicable
+    l26 = max(0.0, l24 - l25)
+    l27 = max(0.0, l21 - l26)               # ordinary income
+    l28 = min(l21, zero_max)
+    l29 = min(l27, l28)
+    l30 = max(0.0, l28 - l29)               # amount taxed at 0%
+    l31 = min(l21, l26)
+    l32 = l26 - l30
+    l33 = min(l21, twenty_thresh)
+    l34 = l27 + l30
+    l35 = max(0.0, l33 - l34)
+    l36 = min(l32, l35)                      # amount taxed at 15%
+    l37 = round(l36 * 0.15, 2)
+    l38 = l31
+    l39 = l30 + l36
+    l40 = max(0.0, l38 - l39)               # amount taxed at 20%
+    l41 = round(l40 * 0.20, 2)
+    l42 = round(_tax(l27), 2)               # ordinary income tax
+    l43 = round(l37 + l41 + l42, 2)
+    l44 = round(_tax(l21), 2)               # tax if all taxable income were ordinary
+    l45 = round(min(l43, l44), 2)
+
+    return {
+        "line21": round(l21, 2), "line22": round(l22, 2), "line23": round(l23, 2),
+        "line24": round(l24, 2), "line25": round(l25, 2), "line26": round(l26, 2),
+        "line27": round(l27, 2), "line28": round(l28, 2), "line29": round(l29, 2),
+        "line30": round(l30, 2), "line31": round(l31, 2), "line32": round(l32, 2),
+        "line33": round(l33, 2), "line34": round(l34, 2), "line35": round(l35, 2),
+        "line36": round(l36, 2), "line37": l37,            "line38": round(l38, 2),
+        "line39": round(l39, 2), "line40": round(l40, 2), "line41": l41,
+        "line42": l42,           "line43": l43,            "line44": l44,
+        "line45": l45,
     }
 
 
@@ -577,33 +643,84 @@ def build_field_maps(computed, fields, cfg=None):
     # ---- Schedule D (f1041sd.pdf) ----
     schedule_d_map = {}
     sd_mappings = {
-        "short_term_proceeds":              computed.get("st_proceeds"),
-        "short_term_cost":                  computed.get("st_cost"),
-        "short_term_wash_sale_disallowed":  computed.get("st_wash_sale"),
-        "net_short_term_gain_loss":         computed.get("st_net"),
-        "long_term_proceeds":               computed.get("lt_proceeds"),
-        "long_term_cost":                   computed.get("lt_cost"),
-        "long_term_wash_sale_disallowed":   computed.get("lt_wash_sale"),
-        "net_long_term_gain_loss":          computed.get("lt_net"),
-        "net_capital_gain":                 computed.get("net_combined"),
+        # Part I — Line 1b: totals from Form 8949 Box A (short-term covered)
+        "part1_line1b_proceeds":            computed.get("st_proceeds"),
+        "part1_line1b_cost":                computed.get("st_cost"),
+        "part1_line1b_wash_sale":           computed.get("st_wash_sale"),
+        "part1_line1b_gain_loss":           computed.get("st_net"),
+        "net_short_term_gain_loss":         computed.get("st_net"),      # Line 7
+        # Part II — Line 8b: totals from Form 8949 Box D (long-term covered)
+        "part2_line8b_proceeds":            computed.get("lt_proceeds"),
+        "part2_line8b_cost":                computed.get("lt_cost"),
+        "part2_line8b_wash_sale":           computed.get("lt_wash_sale"),
+        "part2_line8b_gain_loss":           computed.get("lt_net"),
+        "part2_line15_net_lt_capital_gain": computed.get("lt_net"),      # Line 16
+        # Part III — accumulation trust: no beneficiary distributions, col2=col3=total
+        "part3_line17_col2":                computed.get("st_net"),
+        "part3_line17_col3":                computed.get("st_net"),
+        "part3_line18a_col2":               computed.get("lt_net"),
+        "part3_line18a_col3":               computed.get("lt_net"),
+        "part3_line19_col2":                computed.get("net_combined"),
+        "net_capital_gain":                 computed.get("net_combined"),  # Line 19 col3
     }
     for sem, val in sd_mappings.items():
         fid = resolve(sched_d_fields, sem)
         if fid and val is not None:
             schedule_d_map[fid] = f"{val:.2f}"
 
+    # Header: name and EIN
+    if cfg:
+        trust = cfg.get("trust", {})
+        for sem, val in [("trust_name", trust.get("name")), ("ein", trust.get("ein"))]:
+            fid = resolve(sched_d_fields, sem)
+            if fid and val is not None:
+                schedule_d_map[fid] = str(val)
+
+    # Part V: Tax Computation Using Maximum Capital Gains Rates
+    part5 = computed.get("part5", {})
+    if part5:
+        for line_num in range(21, 46):
+            sem = f"part5_line{line_num}"
+            val = part5.get(f"line{line_num}")
+            fid = resolve(sched_d_fields, sem)
+            if fid and val is not None:
+                schedule_d_map[fid] = f"{val:.2f}"
+
+    # QOF question: always No for this accumulation trust
+    qof_no_entry = sched_d_fields.get("qof_disposed_no")
+    if isinstance(qof_no_entry, dict):
+        fid = qof_no_entry.get("field_id")
+        on_state = qof_no_entry.get("on_state", "/2")
+        if fid:
+            schedule_d_map[fid] = on_state
+
     # ---- Form 8960 (f8960.pdf) ----
     form_8960_map = {}
+
+    # Header: name and EIN
+    if cfg:
+        trust = cfg.get("trust", {})
+        for sem, val in [("name", trust.get("name")), ("ein", trust.get("ein"))]:
+            fid = resolve(f8960_fields, sem)
+            if fid and val is not None:
+                form_8960_map[fid] = str(val)
+
     f8960_mappings = {
-        "interest_income":               computed.get("f8960_interest"),
-        "ordinary_dividends":            computed.get("f8960_dividends"),
-        "net_gain_loss_from_dispositions": computed.get("net_gain_from_dispositions"),
-        "total_net_investment_income":   computed.get("total_nii"),
-        "agi_undistributed_net_income":  computed.get("agi_undistributed_nii"),
-        "niit_threshold":                computed.get("niit_threshold"),
-        "agi_minus_threshold":           computed.get("agi_minus_threshold"),
-        "lesser_of_nii_or_agi_excess":   computed.get("lesser_of_nii_or_agi_excess"),
-        "niit_amount":                   computed.get("niit_amount"),
+        # Part I — investment income items
+        "interest_income":               computed.get("f8960_interest"),        # Line 1
+        "ordinary_dividends":            computed.get("f8960_dividends"),       # Line 2
+        "net_gain_loss_from_dispositions": computed.get("net_gain_from_dispositions"),  # Line 5a
+        "net_gain_5d":                   computed.get("net_gain_from_dispositions"),    # Line 5d (=5a; 5b=5c=0)
+        "total_net_investment_income":   computed.get("total_nii"),             # Line 8
+        # Part III — trust (estate/trust section; individual lines 13-17 left blank)
+        "line12_net_investment_income":  computed.get("total_nii"),             # Line 12 (=Line 8; no deductions)
+        "trust_line18a_nii":             computed.get("total_nii"),             # Line 18a (undistributed NII)
+        "trust_line18c_undist_nii":      computed.get("total_nii"),             # Line 18c (=18a; no distributions)
+        "agi_undistributed_net_income":  computed.get("agi_undistributed_nii"), # Line 19a (trust AGI)
+        "niit_threshold":                computed.get("niit_threshold"),        # Line 19b (threshold)
+        "agi_minus_threshold":           computed.get("agi_minus_threshold"),   # Line 19c (AGI - threshold)
+        "lesser_of_nii_or_agi_excess":   computed.get("lesser_of_nii_or_agi_excess"),  # Line 20
+        "niit_amount":                   computed.get("niit_amount"),           # Line 21
     }
     for sem, val in f8960_mappings.items():
         fid = resolve(f8960_fields, sem)
@@ -612,9 +729,34 @@ def build_field_maps(computed, fields, cfg=None):
 
     # ---- Form 8949 (f8949.pdf) ----
     form_8949_map = {}
+
+    # Header: name and EIN on both pages
+    if cfg:
+        trust = cfg.get("trust", {})
+        name = trust.get("name")
+        ein = trust.get("ein")
+        for sem, val in [("p1_name", name), ("p1_ssn", ein), ("p2_name", name), ("p2_ssn", ein)]:
+            fid = resolve(f8949_fields, sem)
+            if fid and val is not None:
+                form_8949_map[fid] = str(val)
+
     # Short-term transaction (Box A) — fills Page 1 Row 1
     st_rows = [r for r in computed.get("rows", []) if r["form8949_code"] == "A"]
     lt_rows = [r for r in computed.get("rows", []) if r["form8949_code"] == "D"]
+
+    # Check Box A (short-term covered) and Box D (long-term covered)
+    if st_rows:
+        entry = f8949_fields.get("box_a_short_term_covered")
+        if isinstance(entry, dict):
+            fid = entry.get("field_id")
+            if fid:
+                form_8949_map[fid] = "Yes"
+    if lt_rows:
+        entry = f8949_fields.get("box_d_long_term_covered")
+        if isinstance(entry, dict):
+            fid = entry.get("field_id")
+            if fid:
+                form_8949_map[fid] = "Yes"
 
     for i, txn in enumerate(st_rows[:11], start=1):
         prefix = f"p1_row{i}"
@@ -624,8 +766,7 @@ def build_field_maps(computed, fields, cfg=None):
             f"{prefix}_date_sold":     (txn["date_sold"], str),
             f"{prefix}_proceeds":      (txn["proceeds"], lambda v: f"{v:.2f}"),
             f"{prefix}_cost":          (txn["cost"], lambda v: f"{v:.2f}"),
-            f"{prefix}_code":          (txn["form8949_code"], str),
-            f"{prefix}_wash_sale":     (txn["wash_sale"], lambda v: f"{v:.2f}"),
+            # cols (f) and (g) intentionally left blank — no adjustments
             f"{prefix}_gain_loss":     (txn["gain_loss"], lambda v: f"{v:.2f}"),
         }
         for sem, (val, fmt) in row_map.items():
@@ -641,8 +782,7 @@ def build_field_maps(computed, fields, cfg=None):
             f"{prefix}_date_sold":     (txn["date_sold"], str),
             f"{prefix}_proceeds":      (txn["proceeds"], lambda v: f"{v:.2f}"),
             f"{prefix}_cost":          (txn["cost"], lambda v: f"{v:.2f}"),
-            f"{prefix}_code":          (txn["form8949_code"], str),
-            f"{prefix}_wash_sale":     (txn["wash_sale"], lambda v: f"{v:.2f}"),
+            # cols (f) and (g) intentionally left blank — no adjustments
             f"{prefix}_gain_loss":     (txn["gain_loss"], lambda v: f"{v:.2f}"),
         }
         for sem, (val, fmt) in row_map.items():
@@ -658,9 +798,7 @@ def build_field_maps(computed, fields, cfg=None):
         fid = resolve(f8949_fields, "p1_total_cost")
         if fid:
             form_8949_map[fid] = f"{computed.get('st_cost', 0.0):.2f}"
-        fid = resolve(f8949_fields, "p1_total_wash_sale")
-        if fid:
-            form_8949_map[fid] = f"{computed.get('st_wash_sale', 0.0):.2f}"
+        # col (g) totals intentionally left blank — no adjustments
         fid = resolve(f8949_fields, "p1_total_gain_loss")
         if fid:
             form_8949_map[fid] = f"{computed.get('st_net', 0.0):.2f}"
@@ -672,9 +810,7 @@ def build_field_maps(computed, fields, cfg=None):
         fid = resolve(f8949_fields, "p2_total_cost")
         if fid:
             form_8949_map[fid] = f"{computed.get('lt_cost', 0.0):.2f}"
-        fid = resolve(f8949_fields, "p2_total_wash_sale")
-        if fid:
-            form_8949_map[fid] = f"{computed.get('lt_wash_sale', 0.0):.2f}"
+        # col (g) totals intentionally left blank — no adjustments
         fid = resolve(f8949_fields, "p2_total_gain_loss")
         if fid:
             form_8949_map[fid] = f"{computed.get('lt_net', 0.0):.2f}"
@@ -803,6 +939,15 @@ def main():
     )
     print("Computed Schedule G")
 
+    sched_d_part5 = compute_schedule_d_part5(
+        page1["taxable_income"],
+        csv_data["div_1b"],
+        sched_d["lt_net"],
+        sched_d["net_combined"],
+        cfg,
+    )
+    print("Computed Schedule D Part V")
+
     form_8960 = compute_form_8960(csv_data, page1, sched_d, cfg)
     print("Computed Form 8960")
 
@@ -875,6 +1020,7 @@ def main():
         "lt_net": sched_d["lt_net"],
         "net_combined": sched_d["net_combined"],
         "rows": sched_d["rows"],
+        "part5": sched_d_part5,
     })
     field_maps = build_field_maps(computed, fields, cfg)
 
