@@ -13,7 +13,7 @@ A two-phase build: foundation first (config + field catalog + thin PDF filler), 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Tax bracket config, AcroForm field catalog, and thin PDF filler script (completed 2026-03-08)
-- [ ] **Phase 2: Core Skill** - Complete Claude skill for CSV parsing, tax computation, field mapping, and PDF output
+- [x] **Phase 2: Core Skill** - Complete Claude skill for CSV parsing, tax computation, field mapping, and PDF output (completed 2026-03-09)
 
 ## Phase Details
 
@@ -58,7 +58,7 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-08 |
-| 2. Core Skill | 2/3 | In Progress|  |
+| 2. Core Skill | 3/3 | Complete   | 2026-03-09 |
 
 ---
 *Created: 2026-03-08*

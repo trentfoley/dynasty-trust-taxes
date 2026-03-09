@@ -28,16 +28,16 @@
 
 ### PDF Output (Phase 2)
 
-- [ ] **PDF-02**: Skill fills all Form 1041 page 1 fields that were populated on the 2024 reference return — income lines, deduction lines, exemption, taxable income, tax due
-- [ ] **PDF-03**: Skill fills Schedule D (Form 1041) fields — short-term and long-term transaction detail and summary lines
-- [ ] **PDF-04**: Skill fills Schedule G fields — tax computation lines
-- [ ] **PDF-05**: Skill fills Form 8960 fields — net investment income and NIIT amount
-- [ ] **PDF-06**: Output PDF has `NeedAppearances` flag set (handled by fill_pdf.py) so filled fields are visible in any PDF viewer
-- [ ] **PDF-07**: Filled PDF is written to `output/YEAR_1041_filled.pdf`
+- [x] **PDF-02**: Skill fills all Form 1041 page 1 fields that were populated on the 2024 reference return — income lines, deduction lines, exemption, taxable income, tax due
+- [x] **PDF-03**: Skill fills Schedule D (Form 1041) fields — short-term and long-term transaction detail and summary lines
+- [x] **PDF-04**: Skill fills Schedule G fields — tax computation lines
+- [x] **PDF-05**: Skill fills Form 8960 fields — net investment income and NIIT amount
+- [x] **PDF-06**: Output PDF has `NeedAppearances` flag set (handled by fill_pdf.py) so filled fields are visible in any PDF viewer
+- [x] **PDF-07**: Filled PDF is written to `output/YEAR_1041_filled.pdf`
 
 ### Skill Invocation
 
-- [ ] **SKILL-01**: Skill is invocable via a single Claude skill command (e.g., `/fill-1041`) with optional year argument — defaults to current year config
+- [x] **SKILL-01**: Skill is invocable via a single Claude skill command (e.g., `/fill-1041`) with optional year argument — defaults to current year config
 - [x] **SKILL-02**: Skill supports dry-run mode — outputs all computed field values without calling `fill_pdf.py` or writing any file
 - [x] **SKILL-03**: Skill validates computed income totals against CSV source data and surfaces any mismatch before producing PDF output
 - [x] **SKILL-04**: All file paths (CSV input, blank form PDF, output PDF) use sensible defaults from `config/YEAR.json` and can be overridden
@@ -81,13 +81,13 @@
 | CALC-04 | Phase 2 | Complete |
 | CALC-05 | Phase 2 | Complete |
 | CALC-07 | Phase 2 | Complete |
-| PDF-02 | Phase 2 | Pending |
-| PDF-03 | Phase 2 | Pending |
-| PDF-04 | Phase 2 | Pending |
-| PDF-05 | Phase 2 | Pending |
-| PDF-06 | Phase 2 | Pending |
-| PDF-07 | Phase 2 | Pending |
-| SKILL-01 | Phase 2 | Pending |
+| PDF-02 | Phase 2 | Complete |
+| PDF-03 | Phase 2 | Complete |
+| PDF-04 | Phase 2 | Complete |
+| PDF-05 | Phase 2 | Complete |
+| PDF-06 | Phase 2 | Complete |
+| PDF-07 | Phase 2 | Complete |
+| SKILL-01 | Phase 2 | Complete |
 | SKILL-02 | Phase 2 | Complete |
 | SKILL-03 | Phase 2 | Complete |
 | SKILL-04 | Phase 2 | Complete |
