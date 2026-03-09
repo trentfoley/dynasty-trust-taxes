@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-core-skill/02-02 — computation engine complete, ready for 02-03
-last_updated: "2026-03-08T22:02:47.340Z"
+stopped_at: "02-03 checkpoint: Tasks 1+2 complete, awaiting human verification of filled PDFs and slash command"
+last_updated: "2026-03-09T02:43:45.130Z"
 last_activity: 2026-03-08 — Roadmap created, all 22 v1 requirements mapped across 5 phases
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-core-skill P01 | 5 | 2 tasks | 5 files |
 | Phase 02-core-skill P01 | 5 | 2 tasks | 5 files |
 | Phase 02-core-skill P02 | 4 | 2 tasks | 1 files |
+| Phase 02-core-skill P03 | 15 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 02-core-skill]: compute_schedule_g() reads all bracket thresholds from cfg — no hardcoded constants
 - [Phase 02-core-skill]: validate() augments csv_data with raw transaction re-sum for st_gain/lt_gain before comparing to computed values
 - [Phase 02-core-skill]: Schedule G tax /usr/bin/bash.01 rounding diff (9,722.92 vs 9,722.93) is float precision on ordinary_income — within tolerance
+- [Phase 02-core-skill]: Use sys.executable in subprocess.run for fill_form() — Windows subprocess cannot resolve Unix-style bash paths
+- [Phase 02-core-skill]: compute_schedule_d_part5() mirrors IRS form lines 21-45 exactly for auditability
 
 ### Pending Todos
 
@@ -93,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T22:02:47.335Z
-Stopped at: Completed 02-core-skill/02-02 — computation engine complete, ready for 02-03
+Last session: 2026-03-09T02:43:45.127Z
+Stopped at: 02-03 checkpoint: Tasks 1+2 complete, awaiting human verification of filled PDFs and slash command
 Resume file: None
