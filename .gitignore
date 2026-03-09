@@ -1,0 +1,15 @@
+# Sensitive financial data
+2025/
+filed_returns/
+
+# Generated filled PDFs (output of fill_1041.py)
+output/
+
+# Excel calculators / working files
+*.xlsx
+*.xls
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
