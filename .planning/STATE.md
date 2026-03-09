@@ -1,36 +1,35 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: planning
-stopped_at: 02-03 complete — Phase 2 fully verified and complete
-last_updated: "2026-03-09T02:52:32.443Z"
-last_activity: 2026-03-08 — Roadmap created, all 22 v1 requirements mapped across 5 phases
+milestone_name: MVP
+status: complete
+stopped_at: v1.0 milestone archived — all phases complete, tag created
+last_updated: "2026-03-09"
+last_activity: 2026-03-09 — v1.0 milestone complete, all 4 forms verified
 progress:
   total_phases: 2
   completed_phases: 2
   total_plans: 5
   completed_plans: 5
-  percent: 0
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-08)
+See: .planning/PROJECT.md (updated 2026-03-09 after v1.0 milestone)
 
-**Core value:** Given a brokerage year-end CSV and a blank Form 1041 PDF, produce a complete, filled, print-ready Form 1041 in one command.
-**Current focus:** Phase 1 — Foundation
+**Core value:** Given a brokerage year-end CSV and blank IRS form PDFs, produce complete, filled, print-ready tax forms in one `/fill-1041` command.
+**Current focus:** v1.0 shipped — planning next milestone
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-08 — Roadmap created, all 22 v1 requirements mapped across 5 phases
+Phase: All complete (2/2)
+Status: Milestone v1.0 shipped
+Last activity: 2026-03-09 — v1.0 archived, 19/19 requirements verified, all 4 forms filled
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
