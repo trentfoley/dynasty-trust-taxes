@@ -854,6 +854,42 @@ def print_summary(page1, sched_g, form_8960, output_paths):
 
 
 # ---------------------------------------------------------------------------
+# Form 1041-V field map
+# ---------------------------------------------------------------------------
+
+def build_1041v_field_map(cfg, total_tax):
+    """Return AcroForm field dict for Form 1041-V (payment voucher).
+
+    Fields (by position on the detachable voucher):
+      f1_1 — EIN
+      f1_2 — Amount of payment (whole dollars)
+      f1_3 — Amount of payment (cents, 2 digits)
+      f1_4 — Name of estate or trust
+      f1_5 — Name and title of fiduciary
+      f1_6 — Address (street)
+      f1_7 — City, state, ZIP
+    """
+    trust = cfg.get("trust", {})
+    dollars = int(total_tax)
+    cents = round((total_tax - dollars) * 100)
+    city_state_zip = (
+        f"{trust.get('address_city', '')}, "
+        f"{trust.get('address_state', '')}  "
+        f"{trust.get('address_zip', '')}"
+    )
+    prefix = "topmostSubform[0].Page1[0]"
+    return {
+        f"{prefix}.f1_1[0]": trust.get("ein", ""),
+        f"{prefix}.f1_2[0]": str(dollars),
+        f"{prefix}.f1_3[0]": f"{cents:02d}",
+        f"{prefix}.f1_4[0]": trust.get("name", ""),
+        f"{prefix}.f1_5[0]": trust.get("fiduciary_name_title", ""),
+        f"{prefix}.f1_6[0]": trust.get("address_street", ""),
+        f"{prefix}.f1_7[0]": city_state_zip,
+    }
+
+
+# ---------------------------------------------------------------------------
 # PDF fill helper
 # ---------------------------------------------------------------------------
 
@@ -1033,12 +1069,14 @@ def main():
         "schedule_d":  output_dir / f"{year} Schedule D {entity_name}.pdf",
         "form_8960":   output_dir / f"{year} 8960 {entity_name}.pdf",
         "form_8949":   output_dir / f"{year} 8949 {entity_name}.pdf",
+        "form_1041v":  output_dir / f"{year} 1041-V {entity_name}.pdf",
     }
     form_pdfs = {
         "form_1041":  cfg["paths"]["blank_form"],   # forms/f1041.pdf
         "schedule_d": "forms/f1041sd.pdf",
         "form_8960":  "forms/f8960.pdf",
         "form_8949":  "forms/f8949.pdf",
+        "form_1041v": "forms/f1041v.pdf",
     }
 
     # 10. Dry-run: print full computation steps + field-value mapping then exit
@@ -1053,6 +1091,11 @@ def main():
             print(f"WARNING: No AcroForm fields for {form_key} -- skipping PDF output")
             continue
         fill_form(fmap, form_pdfs[form_key], output_paths[form_key])
+
+    # 1041-V payment voucher (built separately — not part of field_maps)
+    total_tax = computed["total_tax"]
+    voucher_map = build_1041v_field_map(cfg, total_tax)
+    fill_form(voucher_map, form_pdfs["form_1041v"], output_paths["form_1041v"])
 
     # 12. Print summary
     print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()])
