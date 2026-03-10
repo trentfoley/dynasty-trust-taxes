@@ -442,8 +442,8 @@ def compute_schedule_d_part5(taxable_income, qual_div, lt_net, net_combined, cfg
 def compute_form_8960(csv_data, page1, sched_d, cfg):
     """Compute Form 8960 Net Investment Income Tax (NIIT).
 
-    For trusts: AGI basis is undistributed net income = taxable_income.
-    NIIT = 3.8% of lesser of (total NII, taxable_income - threshold).
+    For trusts: AGI basis is Form 1041 Line 17 (adjusted total income / gross income),
+    NOT Line 23 (taxable income). NIIT = 3.8% × lesser of (total NII, AGI − threshold).
     """
     niit_cfg = cfg["niit"]
     threshold = niit_cfg["threshold"]   # 15650

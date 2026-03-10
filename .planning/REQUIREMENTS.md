@@ -42,6 +42,12 @@
 - [x] **SKILL-03**: Skill validates computed income totals against CSV source data and surfaces any mismatch before producing PDF output
 - [x] **SKILL-04**: All file paths (CSV input, blank form PDF, output PDF) use sensible defaults from `config/YEAR.json` and can be overridden
 
+## v1.1 Bug Fixes (Phase 3)
+
+- [x] **FIX-01**: Form 8960 Line 19a uses Form 1041 Line 17 (gross income), not Line 23 (taxable income)
+- [x] **FIX-02**: Schedule B Line 6 is populated with the negative capital gain; Line 7 (DNI) is computed correctly
+- [x] **FIX-03**: Line 14 attorney/accountant fees are config-driven via `deductions.attorney_accountant_fees` in `config/YEAR.json`
+
 ## v2 Requirements
 
 ### Enhanced Validation
@@ -91,10 +97,13 @@
 | SKILL-02 | Phase 2 | Complete |
 | SKILL-03 | Phase 2 | Complete |
 | SKILL-04 | Phase 2 | Complete |
+| FIX-01 | Phase 3 | Complete |
+| FIX-02 | Phase 3 | Complete |
+| FIX-03 | Phase 3 | Complete |
 
 **Coverage:**
-- v1 requirements: 22 total
-- Mapped to phases: 22
+- v1 requirements: 22 total, v1.1 fixes: 3 total
+- Mapped to phases: 25
 - Unmapped: 0 ✓
 
 ---
