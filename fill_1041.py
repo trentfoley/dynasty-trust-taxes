@@ -301,16 +301,23 @@ def compute_schedule_b(page1):
     """Compute Schedule B field values for a non-distributing trust.
 
     All distribution fields are $0. Income distribution deduction is $0.
-    Distributable net income equals total income (adjusted total income).
+    Line 6: capital gains are subtracted from total income to arrive at DNI.
+    Per IRS instructions, capital gains retained in corpus are excluded from DNI.
     Accounting income (Line 8, complex trust only) equals total income per 2024 precedent.
     """
+    capital_gain = page1["capital_gain_loss"]           # positive gain from Sched D line 19
+    capital_gains_subtraction = -round(capital_gain, 2) # Line 6: negative per IRS instructions
+                                                         # (Schedule B subtracts capital gains retained
+                                                         #  in corpus to arrive at DNI)
+    dni = round(page1["total_income"] + capital_gains_subtraction, 2)  # Line 7
     return {
         "adjusted_total_income": page1["total_income"],
         "accounting_income": page1["total_income"],
         "income_required_to_be_distributed": 0.0,
         "other_amounts_distributed": 0.0,
         "total_distributions": 0.0,
-        "distributable_net_income": page1["total_income"],
+        "capital_gains_subtraction": capital_gains_subtraction,
+        "distributable_net_income": dni,
         "income_distribution_deduction": 0.0,
     }
 
@@ -592,6 +599,7 @@ def build_field_maps(computed, fields, cfg=None):
         "income_required_to_be_distributed":    computed.get("income_required_to_be_distributed"),
         "other_amounts_distributed":            computed.get("other_amounts_distributed"),
         "total_distributions":                  computed.get("total_distributions"),
+        "gain_from_page1_line4":                computed.get("sched_b_capital_gains_subtraction"),
         "distributable_net_income":             computed.get("distributable_net_income"),
         "income_distribution_deduction":        computed.get("income_distribution_deduction"),
     }
@@ -1039,6 +1047,7 @@ def main():
         "income_required_to_be_distributed": sched_b["income_required_to_be_distributed"],
         "other_amounts_distributed": sched_b["other_amounts_distributed"],
         "total_distributions": sched_b["total_distributions"],
+        "sched_b_capital_gains_subtraction": sched_b["capital_gains_subtraction"],
         "distributable_net_income": sched_b["distributable_net_income"],
         "income_distribution_deduction": sched_b["income_distribution_deduction"],
     })
@@ -1208,6 +1217,7 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
         "income_required_to_be_distributed": sched_b["income_required_to_be_distributed"],
         "other_amounts_distributed": sched_b["other_amounts_distributed"],
         "total_distributions": sched_b["total_distributions"],
+        "sched_b_capital_gains_subtraction": sched_b["capital_gains_subtraction"],
         "distributable_net_income": sched_b["distributable_net_income"],
         "income_distribution_deduction": sched_b["income_distribution_deduction"],
     })
