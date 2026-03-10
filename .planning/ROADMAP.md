@@ -50,18 +50,31 @@ Plans:
 - [ ] 02-02-PLAN.md — Implement tax computation engine (Schedule D, G, B, Form 8960 NIIT, validation) and full dry-run output
 - [ ] 02-03-PLAN.md — Wire live PDF output per form, create /fill-1041 slash command, visual verification checkpoint
 
+### Phase 3: Correct issues found during external review
+
+**Goal:** Apply three precision bug fixes identified by external review — correct Form 8960 Line 19a (use gross income not taxable income), fill Schedule B Line 6 with the correct negative capital gain, and add config-driven Line 14 deduction support
+**Requirements**: FIX-01, FIX-02, FIX-03
+**Depends on:** Phase 2
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Apply all three bug fixes to fill_1041.py and config/2025.json (deductions support, Form 8960 AGI fix, Schedule B Line 6 fix)
+- [ ] 03-02-PLAN.md — Regenerate output PDFs and human-verify corrected values are visible in all forms
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2
+Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-08 |
 | 2. Core Skill | 3/3 | Complete   | 2026-03-09 |
+| 3. Correct issues found during external review | 0/2 | In progress | - |
 
 ---
 *Created: 2026-03-08*
 *Revised: 2026-03-08 — switched from 5-phase Python pipeline to 2-phase Claude skill approach*
 *Revised: 2026-03-08 — Phase 1 plans created (2 plans, Wave 1 parallel)*
 *Revised: 2026-03-08 — Phase 2 plans created (3 plans, Wave 1-2-3 sequential)*
+*Revised: 2026-03-10 — Phase 3 plans created (2 plans, Wave 1-2 sequential)*
