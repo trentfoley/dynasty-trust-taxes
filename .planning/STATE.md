@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone v1.0 shipped
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-10T00:42:37.193Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-10T01:01:00.212Z"
 last_activity: 2026-03-09 — v1.0 archived, 19/19 requirements verified, all 4 forms filled
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 100
 ---
 
@@ -56,6 +56,7 @@ Progress: [██████████] 100%
 | Phase 02-core-skill P02 | 4 | 2 tasks | 1 files |
 | Phase 02-core-skill P03 | 15 | 2 tasks | 2 files |
 | Phase 03-correct-issues-found-during-external-review P01 | 2 | 3 tasks | 2 files |
+| Phase 03-correct-issues-found-during-external-review P02 | 30 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,8 @@ Recent decisions affecting current work:
 - [Phase 03-correct-issues-found-during-external-review]: Form 8960 Line 19a for trusts = Form 1041 Line 17 (gross income), NOT Line 23 (taxable income)
 - [Phase 03-correct-issues-found-during-external-review]: Schedule B DNI excludes capital gains retained in corpus — Line 6 = negative capital gain
 - [Phase 03-correct-issues-found-during-external-review]: Attorney fees deduction from config/deductions.attorney_accountant_fees; Form 8960 NII deduction deferred (audit-safe)
+- [Phase 03-correct-issues-found-during-external-review]: Dollar values formatted as whole numbers with thousands separators for readability on printed tax forms
+- [Phase 03-correct-issues-found-during-external-review]: Attorney/accountant fees set to $1,250 in config/2025.json — deductible on Form 1041 Line 14
 
 ### Roadmap Evolution
 
@@ -103,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T00:42:37.190Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-03-10T01:01:00.209Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
