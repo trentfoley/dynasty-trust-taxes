@@ -38,7 +38,7 @@
   },
   "trust_exemption": 100,
   "deductions": {
-    "attorney_accountant_fees": 0.00
+    "attorney_accountant_fees": 1250.00
   },
   "entity_type": "complex_trust",
   "other_information": {
