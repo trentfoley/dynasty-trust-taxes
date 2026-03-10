@@ -37,6 +37,9 @@
     "20_pct_threshold": 15900
   },
   "trust_exemption": 100,
+  "deductions": {
+    "attorney_accountant_fees": 0.00
+  },
   "entity_type": "complex_trust",
   "other_information": {
     "q1_tax_exempt_income": "No",

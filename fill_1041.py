@@ -274,12 +274,15 @@ def compute_form_1041_page1(csv_data, sched_d, cfg):
     already included in ordinary dividends — do not double-count).
     """
     exemption = cfg.get("trust_exemption", cfg.get("trust", {}).get("exemption", 100))
+    deductions = cfg.get("deductions", {})
+    attorney_fees = round(float(deductions.get("attorney_accountant_fees", 0.0)), 2)
+    total_deductions_line16 = attorney_fees  # Only Line 14 active for 2025
     interest = csv_data["int_box1"]
     ordinary_dividends = csv_data["div_1a"]
     qualified_dividends = csv_data["div_1b"]
     capital_gain_loss = sched_d["net_combined"]
     total_income = round(interest + ordinary_dividends + capital_gain_loss, 2)
-    taxable_income = round(total_income - exemption, 2)
+    taxable_income = round(total_income - total_deductions_line16 - exemption, 2)
 
     return {
         "interest_income": interest,
@@ -288,6 +291,8 @@ def compute_form_1041_page1(csv_data, sched_d, cfg):
         "capital_gain_loss": capital_gain_loss,
         "total_income": total_income,
         "exemption": float(exemption),
+        "attorney_accountant_fees": attorney_fees,
+        "total_deductions": total_deductions_line16,
         "taxable_income": taxable_income,
     }
 
@@ -521,6 +526,8 @@ def build_field_maps(computed, fields, cfg=None):
         "capital_gain_loss":           computed.get("capital_gain_loss"),
         "total_income":                computed.get("total_income"),
         "exemption":                   computed.get("exemption"),
+        "attorney_accountant_fees":    computed.get("attorney_accountant_fees"),
+        "total_deductions":            computed.get("total_deductions"),
         "taxable_income":              computed.get("taxable_income"),
         "total_tax_from_schedule_g":   computed.get("total_tax"),
         "tax_due":                     computed.get("total_tax"),
