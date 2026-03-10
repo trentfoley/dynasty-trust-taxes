@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone v1.0 shipped
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-10T00:19:07.330Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-10T00:42:37.193Z"
 last_activity: 2026-03-09 — v1.0 archived, 19/19 requirements verified, all 4 forms filled
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 100
 ---
 
@@ -55,6 +55,7 @@ Progress: [██████████] 100%
 | Phase 02-core-skill P01 | 5 | 2 tasks | 5 files |
 | Phase 02-core-skill P02 | 4 | 2 tasks | 1 files |
 | Phase 02-core-skill P03 | 15 | 2 tasks | 2 files |
+| Phase 03-correct-issues-found-during-external-review P01 | 2 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase 02-core-skill]: Schedule G tax /usr/bin/bash.01 rounding diff (9,722.92 vs 9,722.93) is float precision on ordinary_income — within tolerance
 - [Phase 02-core-skill]: Use sys.executable in subprocess.run for fill_form() — Windows subprocess cannot resolve Unix-style bash paths
 - [Phase 02-core-skill]: compute_schedule_d_part5() mirrors IRS form lines 21-45 exactly for auditability
+- [Phase 03-correct-issues-found-during-external-review]: Form 8960 Line 19a for trusts = Form 1041 Line 17 (gross income), NOT Line 23 (taxable income)
+- [Phase 03-correct-issues-found-during-external-review]: Schedule B DNI excludes capital gains retained in corpus — Line 6 = negative capital gain
+- [Phase 03-correct-issues-found-during-external-review]: Attorney fees deduction from config/deductions.attorney_accountant_fees; Form 8960 NII deduction deferred (audit-safe)
 
 ### Roadmap Evolution
 
@@ -99,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T00:19:07.326Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-correct-issues-found-during-external-review/03-CONTEXT.md
+Last session: 2026-03-10T00:42:37.190Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
