@@ -509,6 +509,10 @@ def build_field_maps(computed, fields, cfg=None):
     cfg is optional; when provided it drives entity_type and other_information checkboxes.
     """
 
+    def dollar(val):
+        """Format a dollar amount as a whole number with thousands separators."""
+        return f"{round(val):,}"
+
     def resolve(section_dict, semantic_name):
         """Look up a field entry; return field_id string or None."""
         entry = section_dict.get(semantic_name)
@@ -545,12 +549,12 @@ def build_field_maps(computed, fields, cfg=None):
     for sem, val in p1_mappings.items():
         fid = resolve(page1_fields, sem)
         if fid and val is not None:
-            form_1041_map[fid] = f"{val:.2f}"
+            form_1041_map[fid] = dollar(val)
 
     # Line 17: adjusted total income (= total income; no above-line deductions for this trust)
     fid = resolve(page1_fields, "adjusted_total_income")
     if fid:
-        form_1041_map[fid] = f"{computed.get('total_income', 0.0):.2f}"
+        form_1041_map[fid] = dollar(computed.get('total_income', 0.0))
 
     # Line 22: total of Lines 18-21 (IDD + estate_tax_deduction + QBI + exemption)
     fid = resolve(page1_fields, "deductions_total_lines18_21")
@@ -558,7 +562,7 @@ def build_field_maps(computed, fields, cfg=None):
         deductions_18_21 = round(
             computed.get("income_distribution_deduction", 0.0) + computed.get("exemption", 0.0), 2
         )
-        form_1041_map[fid] = f"{deductions_18_21:.2f}"
+        form_1041_map[fid] = dollar(deductions_18_21)
 
     # Entity type checkbox (Page 1, Line A)
     if cfg:
@@ -606,7 +610,7 @@ def build_field_maps(computed, fields, cfg=None):
     for sem, val in sched_b_mappings.items():
         fid = resolve(sched_b_fields, sem)
         if fid and val is not None:
-            form_1041_map[fid] = f"{val:.2f}"
+            form_1041_map[fid] = dollar(val)
 
     # Schedule G fields (embedded in f1041.pdf Pages 2-3)
     sched_g_mappings = {
@@ -619,7 +623,7 @@ def build_field_maps(computed, fields, cfg=None):
     for sem, val in sched_g_mappings.items():
         fid = resolve(sched_g_fields, sem)
         if fid and val is not None:
-            form_1041_map[fid] = f"{val:.2f}"
+            form_1041_map[fid] = dollar(val)
 
     # Other Information checkboxes (Page 3)
     if cfg:
@@ -684,7 +688,7 @@ def build_field_maps(computed, fields, cfg=None):
     for sem, val in sd_mappings.items():
         fid = resolve(sched_d_fields, sem)
         if fid and val is not None:
-            schedule_d_map[fid] = f"{val:.2f}"
+            schedule_d_map[fid] = dollar(val)
 
     # Header: name and EIN
     if cfg:
@@ -702,7 +706,7 @@ def build_field_maps(computed, fields, cfg=None):
             val = part5.get(f"line{line_num}")
             fid = resolve(sched_d_fields, sem)
             if fid and val is not None:
-                schedule_d_map[fid] = f"{val:.2f}"
+                schedule_d_map[fid] = dollar(val)
 
     # QOF question: always No for this accumulation trust
     qof_no_entry = sched_d_fields.get("qof_disposed_no")
@@ -743,7 +747,7 @@ def build_field_maps(computed, fields, cfg=None):
     for sem, val in f8960_mappings.items():
         fid = resolve(f8960_fields, sem)
         if fid and val is not None:
-            form_8960_map[fid] = f"{val:.2f}"
+            form_8960_map[fid] = dollar(val)
 
     # ---- Form 8949 (f8949.pdf) ----
     form_8949_map = {}
@@ -782,10 +786,10 @@ def build_field_maps(computed, fields, cfg=None):
             f"{prefix}_description":  (txn["description"], str),
             f"{prefix}_date_acquired": (txn["date_acquired"], str),
             f"{prefix}_date_sold":     (txn["date_sold"], str),
-            f"{prefix}_proceeds":      (txn["proceeds"], lambda v: f"{v:.2f}"),
-            f"{prefix}_cost":          (txn["cost"], lambda v: f"{v:.2f}"),
+            f"{prefix}_proceeds":      (txn["proceeds"], dollar),
+            f"{prefix}_cost":          (txn["cost"], dollar),
             # cols (f) and (g) intentionally left blank — no adjustments
-            f"{prefix}_gain_loss":     (txn["gain_loss"], lambda v: f"{v:.2f}"),
+            f"{prefix}_gain_loss":     (txn["gain_loss"], dollar),
         }
         for sem, (val, fmt) in row_map.items():
             fid = resolve(f8949_fields, sem)
@@ -798,10 +802,10 @@ def build_field_maps(computed, fields, cfg=None):
             f"{prefix}_description":  (txn["description"], str),
             f"{prefix}_date_acquired": (txn["date_acquired"], str),
             f"{prefix}_date_sold":     (txn["date_sold"], str),
-            f"{prefix}_proceeds":      (txn["proceeds"], lambda v: f"{v:.2f}"),
-            f"{prefix}_cost":          (txn["cost"], lambda v: f"{v:.2f}"),
+            f"{prefix}_proceeds":      (txn["proceeds"], dollar),
+            f"{prefix}_cost":          (txn["cost"], dollar),
             # cols (f) and (g) intentionally left blank — no adjustments
-            f"{prefix}_gain_loss":     (txn["gain_loss"], lambda v: f"{v:.2f}"),
+            f"{prefix}_gain_loss":     (txn["gain_loss"], dollar),
         }
         for sem, (val, fmt) in row_map.items():
             fid = resolve(f8949_fields, sem)
@@ -812,26 +816,26 @@ def build_field_maps(computed, fields, cfg=None):
     if st_rows:
         fid = resolve(f8949_fields, "p1_total_proceeds")
         if fid:
-            form_8949_map[fid] = f"{computed.get('st_proceeds', 0.0):.2f}"
+            form_8949_map[fid] = dollar(computed.get('st_proceeds', 0.0))
         fid = resolve(f8949_fields, "p1_total_cost")
         if fid:
-            form_8949_map[fid] = f"{computed.get('st_cost', 0.0):.2f}"
+            form_8949_map[fid] = dollar(computed.get('st_cost', 0.0))
         # col (g) totals intentionally left blank — no adjustments
         fid = resolve(f8949_fields, "p1_total_gain_loss")
         if fid:
-            form_8949_map[fid] = f"{computed.get('st_net', 0.0):.2f}"
+            form_8949_map[fid] = dollar(computed.get('st_net', 0.0))
 
     if lt_rows:
         fid = resolve(f8949_fields, "p2_total_proceeds")
         if fid:
-            form_8949_map[fid] = f"{computed.get('lt_proceeds', 0.0):.2f}"
+            form_8949_map[fid] = dollar(computed.get('lt_proceeds', 0.0))
         fid = resolve(f8949_fields, "p2_total_cost")
         if fid:
-            form_8949_map[fid] = f"{computed.get('lt_cost', 0.0):.2f}"
+            form_8949_map[fid] = dollar(computed.get('lt_cost', 0.0))
         # col (g) totals intentionally left blank — no adjustments
         fid = resolve(f8949_fields, "p2_total_gain_loss")
         if fid:
-            form_8949_map[fid] = f"{computed.get('lt_net', 0.0):.2f}"
+            form_8949_map[fid] = dollar(computed.get('lt_net', 0.0))
 
     return {
         "form_1041": form_1041_map,
