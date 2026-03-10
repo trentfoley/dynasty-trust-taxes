@@ -447,7 +447,10 @@ def compute_form_8960(csv_data, page1, sched_d, cfg):
     net_gain = sched_d["net_combined"]
     total_nii = round(interest + ordinary_dividends + net_gain, 2)
 
-    agi_undistributed_nii = page1["taxable_income"]
+    # CORRECTED: Form 8960 Part III Line 19a for trusts = Form 1041 Line 17 (adjusted total income / gross income)
+    # IRS instructions explicitly say Line 19a = Line 17, NOT Line 23 (taxable income).
+    # The $100 complex trust exemption must NOT be subtracted before feeding Form 8960 Line 19a.
+    agi_undistributed_nii = page1["total_income"]
     agi_minus_threshold = round(max(0.0, agi_undistributed_nii - threshold), 2)
     lesser_of_nii_or_agi_excess = round(min(total_nii, agi_minus_threshold), 2)
     niit_amount = round(lesser_of_nii_or_agi_excess * rate, 2)
