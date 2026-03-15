@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-03-09 after v1.0 milestone)
 
 Phase: 4 — Adapt to work with my brother Chris's trust (Plan 2/2 complete)
 Status: All phases complete
-Last activity: 2026-03-15 — Phase 4 Plan 02 complete (conditional form generation, per-trust output)
+Last activity: 2026-03-15 - Completed quick task 001: Combine all form PDFs into single output per trust
 
 Progress: [██████████] 100%
 
@@ -110,6 +110,12 @@ None yet.
 
 - Phase 4: AcroForm field names for 2025 IRS forms are unknown until `pypdf PdfReader.get_fields()` is run against the actual downloaded PDFs in `forms/` — this is a prerequisite for Phase 4 implementation
 - Phase 4: Must verify 2025 Form 1041 uses AcroForm (not XFA) before starting filler work; if XFA, the PDF approach changes entirely
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Combine all form PDFs into single output per trust | 2026-03-15 | a393f5f | [001-combine-pdf-output](./quick/001-combine-pdf-output/) |
 
 ## Session Continuity
 
