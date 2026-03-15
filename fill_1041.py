@@ -303,7 +303,8 @@ def compute_form_1041_page1(csv_data, sched_d, cfg):
     qualified_dividends = csv_data["div_1b"]
     capital_gain_loss = sched_d["net_combined"]
     total_income = round(interest + ordinary_dividends + capital_gain_loss, 2)
-    taxable_income = round(total_income - total_deductions_line16 - exemption, 2)
+    adjusted_total_income = round(total_income - total_deductions_line16, 2)  # Line 17
+    taxable_income = round(adjusted_total_income - exemption, 2)
 
     return {
         "interest_income": interest,
@@ -311,6 +312,7 @@ def compute_form_1041_page1(csv_data, sched_d, cfg):
         "qualified_dividends": qualified_dividends,
         "capital_gain_loss": capital_gain_loss,
         "total_income": total_income,
+        "adjusted_total_income": adjusted_total_income,
         "exemption": float(exemption),
         "attorney_accountant_fees": attorney_fees,
         "total_deductions": total_deductions_line16,
@@ -330,9 +332,9 @@ def compute_schedule_b(page1):
     capital_gains_subtraction = -round(capital_gain, 2) # Line 6: negative per IRS instructions
                                                          # (Schedule B subtracts capital gains retained
                                                          #  in corpus to arrive at DNI)
-    dni = round(page1["total_income"] + capital_gains_subtraction, 2)  # Line 7
+    dni = round(max(0.0, page1["adjusted_total_income"] + capital_gains_subtraction), 2)  # Line 7
     return {
-        "adjusted_total_income": page1["total_income"],
+        "adjusted_total_income": page1["adjusted_total_income"],
         "accounting_income": page1["total_income"],
         "income_required_to_be_distributed": 0.0,
         "other_amounts_distributed": 0.0,
@@ -478,10 +480,9 @@ def compute_form_8960(csv_data, page1, sched_d, cfg):
     net_gain = sched_d["net_combined"]
     total_nii = round(interest + ordinary_dividends + net_gain, 2)
 
-    # CORRECTED: Form 8960 Part III Line 19a for trusts = Form 1041 Line 17 (adjusted total income / gross income)
-    # IRS instructions explicitly say Line 19a = Line 17, NOT Line 23 (taxable income).
-    # The $100 complex trust exemption must NOT be subtracted before feeding Form 8960 Line 19a.
-    agi_undistributed_nii = page1["total_income"]
+    # Form 8960 Part III Line 19a for trusts = Form 1041 Line 17 (adjusted total income)
+    # IRS instructions explicitly say Line 19a = Line 17 (total income minus deductions, before exemption).
+    agi_undistributed_nii = page1["adjusted_total_income"]
     agi_minus_threshold = round(max(0.0, agi_undistributed_nii - threshold), 2)
     lesser_of_nii_or_agi_excess = round(min(total_nii, agi_minus_threshold), 2)
     niit_amount = round(lesser_of_nii_or_agi_excess * rate, 2)
@@ -575,10 +576,10 @@ def build_field_maps(computed, fields, cfg=None):
         if fid and val is not None:
             form_1041_map[fid] = dollar(val)
 
-    # Line 17: adjusted total income (= total income; no above-line deductions for this trust)
+    # Line 17: adjusted total income (total income minus deductions, before exemption)
     fid = resolve(page1_fields, "adjusted_total_income")
     if fid:
-        form_1041_map[fid] = dollar(computed.get('total_income', 0.0))
+        form_1041_map[fid] = dollar(computed.get('adjusted_total_income', 0.0))
 
     # Line 22: total of Lines 18-21 (IDD + estate_tax_deduction + QBI + exemption)
     fid = resolve(page1_fields, "deductions_total_lines18_21")
