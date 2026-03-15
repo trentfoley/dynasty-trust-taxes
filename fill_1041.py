@@ -884,14 +884,15 @@ def print_header(args, cfg):
     print(f"Mode:         {mode}")
 
 
-def print_summary(page1, sched_g, form_8960, output_paths):
-    """Print final summary block after live PDF writing (used in Plan 03)."""
+def print_summary(page1, sched_g, form_8960, output_paths, needs_form_8960=True):
+    """Print final summary block after live PDF writing."""
     print()
     print("=== Summary ===")
     print(f"Gross income:   ${page1['total_income']:,.2f}")
     print(f"Taxable income: ${page1['taxable_income']:,.2f}")
     print(f"Schedule G tax: ${sched_g['tax_on_taxable_income']:,.2f}")
-    print(f"NIIT:           ${form_8960['niit_amount']:,.2f}")
+    if needs_form_8960:
+        print(f"NIIT:           ${form_8960['niit_amount']:,.2f}")
     total_tax = sched_g["tax_on_taxable_income"] + form_8960["niit_amount"]
     print(f"Total tax:      ${total_tax:,.2f}")
     print("Output files:")
@@ -1004,12 +1005,26 @@ def main():
     csv_data = parse_csv(args.csv)
     print("Parsed CSV")
 
-    # 6. Computation chain
-    sched_d = compute_schedule_d(csv_data["transactions"])
-    print("Computed Schedule D")
+    # 5a. Determine which forms are needed based on data
+    has_transactions = len(csv_data["transactions"]) > 0
+    needs_schedule_d = has_transactions
+    needs_form_8949 = has_transactions
+
+    # 6. Computation chain — conditionally compute Schedule D
+    if needs_schedule_d:
+        sched_d = compute_schedule_d(csv_data["transactions"])
+        print("Computed Schedule D")
+    else:
+        sched_d = {"st_proceeds": 0, "st_cost": 0, "st_wash_sale": 0, "st_net": 0,
+                   "lt_proceeds": 0, "lt_cost": 0, "lt_wash_sale": 0, "lt_net": 0,
+                   "net_combined": 0, "rows": []}
+        print("Schedule D: skipped (no transactions)")
 
     page1 = compute_form_1041_page1(csv_data, sched_d, cfg)
     sched_b = compute_schedule_b(page1)
+
+    # Determine NIIT requirement after page1 is computed (needs total_income)
+    needs_form_8960 = page1["total_income"] > cfg["niit"]["threshold"]
 
     sched_g = compute_schedule_g(
         page1["taxable_income"],
@@ -1019,17 +1034,27 @@ def main():
     )
     print("Computed Schedule G")
 
-    sched_d_part5 = compute_schedule_d_part5(
-        page1["taxable_income"],
-        csv_data["div_1b"],
-        sched_d["lt_net"],
-        sched_d["net_combined"],
-        cfg,
-    )
-    print("Computed Schedule D Part V")
+    if needs_schedule_d:
+        sched_d_part5 = compute_schedule_d_part5(
+            page1["taxable_income"],
+            csv_data["div_1b"],
+            sched_d["lt_net"],
+            sched_d["net_combined"],
+            cfg,
+        )
+        print("Computed Schedule D Part V")
+    else:
+        sched_d_part5 = {}
+        print("Schedule D Part V: skipped (no transactions)")
 
-    form_8960 = compute_form_8960(csv_data, page1, sched_d, cfg)
-    print("Computed Form 8960")
+    if needs_form_8960:
+        form_8960 = compute_form_8960(csv_data, page1, sched_d, cfg)
+        print("Computed Form 8960")
+    else:
+        form_8960 = {"interest_income": 0, "ordinary_dividends": 0, "net_gain_from_dispositions": 0,
+                     "total_nii": 0, "agi_undistributed_nii": 0, "niit_threshold": cfg["niit"]["threshold"],
+                     "agi_minus_threshold": 0, "lesser_of_nii_or_agi_excess": 0, "niit_amount": 0.0}
+        print("Form 8960: skipped (income below NIIT threshold)")
 
     # 7. Validation — re-sum gains from raw CSV transactions for cross-check
     raw_st_gain = sum(
@@ -1105,32 +1130,41 @@ def main():
     })
     field_maps = build_field_maps(computed, fields, cfg)
 
-    # 9. Output paths and form PDFs
+    # 9. Output paths and form PDFs (conditional based on trust needs)
     year = args.year
     output_dir = Path(args.output_dir)
     entity_name = cfg.get("trust", {}).get("name", "Trust")
+
+    # Always generate Form 1041 and 1041-V
     output_paths = {
-        "form_1041":   output_dir / f"{year} 1041 {entity_name}.pdf",
-        "schedule_d":  output_dir / f"{year} Schedule D {entity_name}.pdf",
-        "form_8960":   output_dir / f"{year} 8960 {entity_name}.pdf",
-        "form_8949":   output_dir / f"{year} 8949 {entity_name}.pdf",
-        "form_1041v":  output_dir / f"{year} 1041-V {entity_name}.pdf",
+        "form_1041":  output_dir / f"{year} 1041 {entity_name}.pdf",
+        "form_1041v": output_dir / f"{year} 1041-V {entity_name}.pdf",
     }
     form_pdfs = {
         "form_1041":  cfg["paths"]["blank_form"],   # forms/f1041.pdf
-        "schedule_d": "forms/f1041sd.pdf",
-        "form_8960":  "forms/f8960.pdf",
-        "form_8949":  "forms/f8949.pdf",
         "form_1041v": "forms/f1041v.pdf",
     }
 
+    # Conditionally add Schedule D, Form 8949, Form 8960
+    if needs_schedule_d:
+        output_paths["schedule_d"] = output_dir / f"{year} Schedule D {entity_name}.pdf"
+        form_pdfs["schedule_d"] = "forms/f1041sd.pdf"
+    if needs_form_8949:
+        output_paths["form_8949"] = output_dir / f"{year} 8949 {entity_name}.pdf"
+        form_pdfs["form_8949"] = "forms/f8949.pdf"
+    if needs_form_8960:
+        output_paths["form_8960"] = output_dir / f"{year} 8960 {entity_name}.pdf"
+        form_pdfs["form_8960"] = "forms/f8960.pdf"
+
     # 10. Dry-run: print full computation steps + field-value mapping then exit
     if args.dry_run:
-        _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg)
+        _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg,
+                       needs_schedule_d=needs_schedule_d, needs_form_8960=needs_form_8960)
         sys.exit(0)
 
-    # 11. Live mode: write filled PDFs
-    for form_key in ["form_1041", "schedule_d", "form_8960", "form_8949"]:
+    # 11. Live mode: create output directory and write filled PDFs
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for form_key in [k for k in ["form_1041", "schedule_d", "form_8960", "form_8949"] if k in form_pdfs]:
         fmap = field_maps[form_key]
         if not fmap:
             print(f"WARNING: No AcroForm fields for {form_key} -- skipping PDF output")
@@ -1143,10 +1177,12 @@ def main():
     fill_form(voucher_map, form_pdfs["form_1041v"], output_paths["form_1041v"])
 
     # 12. Print summary
-    print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()])
+    print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()],
+                  needs_form_8960=needs_form_8960)
 
 
-def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg=None):
+def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg=None,
+                   needs_schedule_d=True, needs_form_8960=True):
     """Print full dry-run output: computation steps + field-value mapping."""
 
     total_tax = sched_g["tax_on_taxable_income"] + form_8960["niit_amount"]
@@ -1165,32 +1201,36 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
 
     # 1099-B transactions
     txns = csv_data["transactions"]
-    lt_txns = [t for t in txns if t["form8949_code"] == "D"]
-    st_txns = [t for t in txns if t["form8949_code"] == "A"]
-    print(f"1099-B ({len(txns)} transactions):")
-    for txn in lt_txns:
-        adj_cost = txn["cost"] + txn["wash_sale"]
-        gain = txn["proceeds"] - adj_cost
-        print(
-            f"  [Box D - Long term]   {txn['date_acquired']} -> {txn['date_sold']}"
-            f"   proceeds=${txn['proceeds']:,.2f}   cost=${txn['cost']:,.2f}"
-            f"   gain=${gain:,.2f}"
-        )
-    for txn in st_txns:
-        adj_cost = txn["cost"] + txn["wash_sale"]
-        gain = txn["proceeds"] - adj_cost
-        print(
-            f"  [Box A - Short term]  {txn['date_acquired']} -> {txn['date_sold']}"
-            f"   proceeds=${txn['proceeds']:,.2f}   cost=${txn['cost']:,.2f}"
-            f"   gain=${gain:,.2f}"
-        )
+    if txns:
+        lt_txns = [t for t in txns if t["form8949_code"] == "D"]
+        st_txns = [t for t in txns if t["form8949_code"] == "A"]
+        print(f"1099-B ({len(txns)} transactions):")
+        for txn in lt_txns:
+            adj_cost = txn["cost"] + txn["wash_sale"]
+            gain = txn["proceeds"] - adj_cost
+            print(
+                f"  [Box D - Long term]   {txn['date_acquired']} -> {txn['date_sold']}"
+                f"   proceeds=${txn['proceeds']:,.2f}   cost=${txn['cost']:,.2f}"
+                f"   gain=${gain:,.2f}"
+            )
+        for txn in st_txns:
+            adj_cost = txn["cost"] + txn["wash_sale"]
+            gain = txn["proceeds"] - adj_cost
+            print(
+                f"  [Box A - Short term]  {txn['date_acquired']} -> {txn['date_sold']}"
+                f"   proceeds=${txn['proceeds']:,.2f}   cost=${txn['cost']:,.2f}"
+                f"   gain=${gain:,.2f}"
+            )
+    else:
+        print("1099-B: no transactions")
 
-    # Schedule D
-    print()
-    print("Schedule D:")
-    print(f"  Net short-term capital gain (Part I Line 7):   ${sched_d['st_net']:,.2f}")
-    print(f"  Net long-term capital gain (Part II Line 15):  ${sched_d['lt_net']:,.2f}")
-    print(f"  Net capital gain (Part III Line 19):           ${sched_d['net_combined']:,.2f}")
+    # Schedule D (only if applicable)
+    if needs_schedule_d:
+        print()
+        print("Schedule D:")
+        print(f"  Net short-term capital gain (Part I Line 7):   ${sched_d['st_net']:,.2f}")
+        print(f"  Net long-term capital gain (Part II Line 15):  ${sched_d['lt_net']:,.2f}")
+        print(f"  Net capital gain (Part III Line 19):           ${sched_d['net_combined']:,.2f}")
 
     # Form 1041 Page 1
     print()
@@ -1215,15 +1255,16 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
     print(f"  Cap gains (20% bucket):           ${sched_g['twenty_bucket']:,.2f} x 20% = ${twenty_tax:,.2f}")
     print(f"  Schedule G Line 1a tax:           ${sched_g['tax_on_taxable_income']:,.2f}")
 
-    # Form 8960 (NIIT)
-    print()
-    print("Form 8960 (NIIT):")
-    print(f"  Total NII (Line 8):               ${form_8960['total_nii']:,.2f}")
-    print(f"  AGI / undistrib. NII (Line 9b):   ${form_8960['agi_undistributed_nii']:,.2f}")
-    print(f"  NIIT threshold (Line 9c):         ${form_8960['niit_threshold']:,.2f}")
-    print(f"  AGI minus threshold (Line 9d):    ${form_8960['agi_minus_threshold']:,.2f}")
-    print(f"  NIIT base - lesser (Line 10):     ${form_8960['lesser_of_nii_or_agi_excess']:,.2f}")
-    print(f"  NIIT (Line 21 = 3.8%):            ${form_8960['niit_amount']:,.2f}")
+    # Form 8960 (NIIT) — only if applicable
+    if needs_form_8960:
+        print()
+        print("Form 8960 (NIIT):")
+        print(f"  Total NII (Line 8):               ${form_8960['total_nii']:,.2f}")
+        print(f"  AGI / undistrib. NII (Line 9b):   ${form_8960['agi_undistributed_nii']:,.2f}")
+        print(f"  NIIT threshold (Line 9c):         ${form_8960['niit_threshold']:,.2f}")
+        print(f"  AGI minus threshold (Line 9d):    ${form_8960['agi_minus_threshold']:,.2f}")
+        print(f"  NIIT base - lesser (Line 10):     ${form_8960['lesser_of_nii_or_agi_excess']:,.2f}")
+        print(f"  NIIT (Line 21 = 3.8%):            ${form_8960['niit_amount']:,.2f}")
 
     # Summary
     print()
@@ -1231,7 +1272,8 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
     print(f"  Gross income:                     ${page1['total_income']:,.2f}")
     print(f"  Taxable income:                   ${page1['taxable_income']:,.2f}")
     print(f"  Schedule G tax:                   ${sched_g['tax_on_taxable_income']:,.2f}")
-    print(f"  NIIT (Form 8960 Line 21):         ${form_8960['niit_amount']:,.2f}")
+    if needs_form_8960:
+        print(f"  NIIT (Form 8960 Line 21):         ${form_8960['niit_amount']:,.2f}")
     print(f"  Total tax:                        ${total_tax:,.2f}")
 
     # Build merged computed dict for field mapping
@@ -1287,29 +1329,32 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
     else:
         print("  (no fields mapped)")
 
-    print()
-    print("[Schedule D (f1041sd.pdf)]")
-    if field_maps["schedule_d"]:
-        for fid, val in field_maps["schedule_d"].items():
-            print(f"  {fid}: {val}")
-    else:
-        print("  (No AcroForm fields — XFA form, PDF fill skipped)")
+    if needs_schedule_d:
+        print()
+        print("[Schedule D (f1041sd.pdf)]")
+        if field_maps["schedule_d"]:
+            for fid, val in field_maps["schedule_d"].items():
+                print(f"  {fid}: {val}")
+        else:
+            print("  (No AcroForm fields — XFA form, PDF fill skipped)")
 
-    print()
-    print("[Form 8960 (f8960.pdf)]")
-    if field_maps["form_8960"]:
-        for fid, val in field_maps["form_8960"].items():
-            print(f"  {fid}: {val}")
-    else:
-        print("  (no fields mapped)")
+    if needs_form_8960:
+        print()
+        print("[Form 8960 (f8960.pdf)]")
+        if field_maps["form_8960"]:
+            for fid, val in field_maps["form_8960"].items():
+                print(f"  {fid}: {val}")
+        else:
+            print("  (no fields mapped)")
 
-    print()
-    print("[Form 8949 (f8949.pdf)]")
-    if field_maps["form_8949"]:
-        for fid, val in field_maps["form_8949"].items():
-            print(f"  {fid}: {val}")
-    else:
-        print("  (no fields mapped)")
+    if csv_data["transactions"]:
+        print()
+        print("[Form 8949 (f8949.pdf)]")
+        if field_maps["form_8949"]:
+            for fid, val in field_maps["form_8949"].items():
+                print(f"  {fid}: {val}")
+        else:
+            print("  (no fields mapped)")
 
 
 if __name__ == "__main__":
