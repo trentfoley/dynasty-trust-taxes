@@ -66,7 +66,7 @@ Plans:
 **Goal:** Refactor fill_1041.py for multi-trust support via `--trust` CLI flag, with per-trust config files, conditional form generation (Chris gets Form 1041 only; Trent gets all 4 forms), and a fix for the compute_schedule_g cap bug that manifests when qualified dividends exceed taxable income
 **Requirements**: MULTI-01, MULTI-02, MULTI-03, MULTI-04, MULTI-05, MULTI-06, MULTI-07
 **Depends on:** Phase 3
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 04-01-PLAN.md — Create Chris config + CSV, update Trent config paths, refactor CLI for --trust flag, fix compute_schedule_g cap bug
@@ -82,7 +82,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation | 2/2 | Complete   | 2026-03-08 |
 | 2. Core Skill | 3/3 | Complete   | 2026-03-09 |
 | 3. Correct issues found during external review | 2/2 | Complete | 2026-03-10 |
-| 4. Adapt to work with my brother Chris's trust | 0/2 | Planned | - |
+| 4. Adapt to work with my brother Chris's trust | 2/2 | Complete   | 2026-03-15 |
 
 ---
 *Created: 2026-03-08*

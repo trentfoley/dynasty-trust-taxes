@@ -62,9 +62,9 @@
 
 ### Conditional Form Generation
 
-- [ ] **MULTI-05**: Forms are generated conditionally — Schedule D and Form 8949 only when capital transactions exist; Form 8960 only when income exceeds NIIT threshold; Form 1041 always generated
-- [ ] **MULTI-06**: Output PDFs are organized in per-trust subdirectories (`output/trent/`, `output/chris/`) with filenames retaining the full trust name pattern
-- [ ] **MULTI-07**: Trent's tax computation and output are unchanged after the multi-trust refactor (regression: total tax = $23,120.87)
+- [x] **MULTI-05**: Forms are generated conditionally — Schedule D and Form 8949 only when capital transactions exist; Form 8960 only when income exceeds NIIT threshold; Form 1041 always generated
+- [x] **MULTI-06**: Output PDFs are organized in per-trust subdirectories (`output/trent/`, `output/chris/`) with filenames retaining the full trust name pattern
+- [x] **MULTI-07**: Trent's tax computation and output are unchanged after the multi-trust refactor (regression: total tax = $23,120.87)
 
 ## v2 Requirements
 

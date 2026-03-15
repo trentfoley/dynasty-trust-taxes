@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 4 in progress
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-15T03:22:05.149Z"
-last_activity: 2026-03-15 — Phase 4 Plan 01 complete (multi-trust CLI, schedule_g fix)
+status: Phase 4 complete — all phases done
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-15T03:34:24.591Z"
+last_activity: 2026-03-15 — Phase 4 Plan 02 complete (conditional form generation, per-trust output)
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 4
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 100
 ---
 
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09 after v1.0 milestone)
 
 **Core value:** Given a brokerage year-end CSV and blank IRS form PDFs, produce complete, filled, print-ready tax forms in one `/fill-1041` command.
-**Current focus:** Phase 4 — Multi-trust support (Plan 01 of 02 complete)
+**Current focus:** All phases complete — multi-trust support fully operational
 
 ## Current Position
 
-Phase: 4 — Adapt to work with my brother Chris's trust (Plan 1/2)
-Status: Phase 4 in progress
-Last activity: 2026-03-15 — Phase 4 Plan 01 complete (multi-trust CLI, schedule_g fix)
+Phase: 4 — Adapt to work with my brother Chris's trust (Plan 2/2 complete)
+Status: All phases complete
+Last activity: 2026-03-15 — Phase 4 Plan 02 complete (conditional form generation, per-trust output)
 
-Progress: [████████░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [████████░░] 75%
 | Phase 03-correct-issues-found-during-external-review P01 | 2 | 3 tasks | 2 files |
 | Phase 03-correct-issues-found-during-external-review P02 | 30 | 2 tasks | 6 files |
 | Phase 04-adapt P01 | 5 | 2 tasks | 5 files |
+| Phase 04-adapt P02 | 5 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,7 @@ Recent decisions affecting current work:
 - [Phase 04-adapt]: compute_schedule_g cap fix: preferential_income capped at taxable_income — corrects both Chris ($779.35) and Trent ($19,475.63, was $19,720.22)
 - [Phase 04-adapt]: Two-phase CLI parsing: parse_trust_and_year() extracts --trust before config load, then parse_args() gets remaining flags
 - [Phase 04-adapt]: Per-trust config files: config/{year}_{trust}.json — brackets duplicated, no shared config layer
+- [Phase 04-adapt]: Conditional form generation: flags gate Schedule D, 8949, 8960 based on trust data
 
 ### Roadmap Evolution
 
@@ -111,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T03:21:07Z
-Stopped at: Completed 04-01-PLAN.md
-Resume file: .planning/phases/04-adapt-to-work-with-my-brother-chris-s-trust/04-01-SUMMARY.md
+Last session: 2026-03-15T03:34:24.587Z
+Stopped at: Completed 04-02-PLAN.md
+Resume file: None
