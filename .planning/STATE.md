@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Milestone v1.0 shipped
-stopped_at: Phase 4 context gathered
-last_updated: "2026-03-15T02:53:29.544Z"
-last_activity: 2026-03-09 — v1.0 archived, 19/19 requirements verified, all 4 forms filled
+status: Phase 4 in progress
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-03-15T03:22:05.149Z"
+last_activity: 2026-03-15 — Phase 4 Plan 01 complete (multi-trust CLI, schedule_g fix)
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
   percent: 100
 ---
 
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09 after v1.0 milestone)
 
 **Core value:** Given a brokerage year-end CSV and blank IRS form PDFs, produce complete, filled, print-ready tax forms in one `/fill-1041` command.
-**Current focus:** v1.0 shipped — planning next milestone
+**Current focus:** Phase 4 — Multi-trust support (Plan 01 of 02 complete)
 
 ## Current Position
 
-Phase: All complete (2/2)
-Status: Milestone v1.0 shipped
-Last activity: 2026-03-09 — v1.0 archived, 19/19 requirements verified, all 4 forms filled
+Phase: 4 — Adapt to work with my brother Chris's trust (Plan 1/2)
+Status: Phase 4 in progress
+Last activity: 2026-03-15 — Phase 4 Plan 01 complete (multi-trust CLI, schedule_g fix)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100%
 | Phase 02-core-skill P03 | 15 | 2 tasks | 2 files |
 | Phase 03-correct-issues-found-during-external-review P01 | 2 | 3 tasks | 2 files |
 | Phase 03-correct-issues-found-during-external-review P02 | 30 | 2 tasks | 6 files |
+| Phase 04-adapt P01 | 5 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 03-correct-issues-found-during-external-review]: Attorney fees deduction from config/deductions.attorney_accountant_fees; Form 8960 NII deduction deferred (audit-safe)
 - [Phase 03-correct-issues-found-during-external-review]: Dollar values formatted as whole numbers with thousands separators for readability on printed tax forms
 - [Phase 03-correct-issues-found-during-external-review]: Attorney/accountant fees set to $1,250 in config/2025.json — deductible on Form 1041 Line 14
+- [Phase 04-adapt]: compute_schedule_g cap fix: preferential_income capped at taxable_income — corrects both Chris ($779.35) and Trent ($19,475.63, was $19,720.22)
+- [Phase 04-adapt]: Two-phase CLI parsing: parse_trust_and_year() extracts --trust before config load, then parse_args() gets remaining flags
+- [Phase 04-adapt]: Per-trust config files: config/{year}_{trust}.json — brackets duplicated, no shared config layer
 
 ### Roadmap Evolution
 
@@ -107,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T02:53:29.542Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-adapt-to-work-with-my-brother-chris-s-trust/04-CONTEXT.md
+Last session: 2026-03-15T03:21:07Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: .planning/phases/04-adapt-to-work-with-my-brother-chris-s-trust/04-01-SUMMARY.md

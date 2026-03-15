@@ -52,13 +52,13 @@
 
 ### Multi-Trust CLI & Config
 
-- [ ] **MULTI-01**: `fill_1041.py` accepts a required `--trust` flag (choices: trent, chris) that selects the per-trust config file `config/{year}_{trust}.json`
-- [ ] **MULTI-02**: Per-trust config files exist (`config/2025_trent.json`, `config/2025_chris.json`) with trust-specific identity, address, fees, and paths; brackets/thresholds duplicated (same tax year)
-- [ ] **MULTI-03**: Chris's 1099-DIV data is available as a manually-created CSV (`2025_chris/dividends.csv`) compatible with the existing `parse_csv()` state machine
+- [x] **MULTI-01**: `fill_1041.py` accepts a required `--trust` flag (choices: trent, chris) that selects the per-trust config file `config/{year}_{trust}.json`
+- [x] **MULTI-02**: Per-trust config files exist (`config/2025_trent.json`, `config/2025_chris.json`) with trust-specific identity, address, fees, and paths; brackets/thresholds duplicated (same tax year)
+- [x] **MULTI-03**: Chris's 1099-DIV data is available as a manually-created CSV (`2025_chris/dividends.csv`) compatible with the existing `parse_csv()` state machine
 
 ### Tax Computation Fix
 
-- [ ] **MULTI-04**: `compute_schedule_g()` caps preferential income at taxable income, producing correct tax when qualified dividends exceed taxable income (Chris: $779.35, not $824.41)
+- [x] **MULTI-04**: `compute_schedule_g()` caps preferential income at taxable income, producing correct tax when qualified dividends exceed taxable income (Chris: $779.35, not $824.41)
 
 ### Conditional Form Generation
 
