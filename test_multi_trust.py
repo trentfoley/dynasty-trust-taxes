@@ -72,8 +72,13 @@ class TestScheduleGCapBug(unittest.TestCase):
         self.assertAlmostEqual(result["twenty_bucket"], 0.0, places=2,
                                msg=f"twenty_bucket should be 0, got {result['twenty_bucket']}")
 
-    def test_trent_schedule_g_regression(self):
-        """Trent's numbers should be unchanged after the cap fix."""
+    def test_trent_schedule_g_matches_part5(self):
+        """Trent's Schedule G should now match Part V canonical answer ($19,475.63).
+
+        The old Schedule G produced $19,720.22 due to the same uncapped preferential bug,
+        but Part V (the IRS authoritative calculation) always returned $19,475.63.
+        The fix corrects Schedule G to match Part V.
+        """
         from fill_1041 import compute_schedule_g
         with open("config/2025_trent.json") as f:
             cfg = json.load(f)
@@ -83,9 +88,9 @@ class TestScheduleGCapBug(unittest.TestCase):
             lt_net_gain=104109.76,
             cfg=cfg,
         )
-        # Trent's Schedule G tax was $19,720.22 before the fix
-        self.assertAlmostEqual(result["tax_on_taxable_income"], 19720.22, places=2,
-                               msg=f"Trent tax should be 19720.22, got {result['tax_on_taxable_income']}")
+        # Part V line 45 = $19,475.63 (verified against IRS worksheet)
+        self.assertAlmostEqual(result["tax_on_taxable_income"], 19475.63, places=2,
+                               msg=f"Trent tax should be 19475.63 (Part V), got {result['tax_on_taxable_income']}")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
-"""fill_1041.py — Form 1041 filler for Trent Foley Childrens 2021 Super Dynasty Trust.
+"""fill_1041.py — Form 1041 filler for dynasty trust tax returns.
 
 Usage:
-    python fill_1041.py [--year YYYY] [--csv PATH] [--output-dir PATH] [--dry-run]
+    python fill_1041.py --trust trent [--year YYYY] [--csv PATH] [--output-dir PATH] [--dry-run]
+    python fill_1041.py --trust chris [--year YYYY] [--dry-run]
 
+The --trust flag is required and selects which trust config to load.
 Requires Python stdlib only (argparse, csv, json, subprocess, sys, pathlib).
 Python executable: /c/ProgramData/miniconda3/python (NOT python3 -- Windows Store stub).
 """
@@ -20,9 +22,9 @@ from pathlib import Path
 # Config helpers
 # ---------------------------------------------------------------------------
 
-def load_config(year=2025):
-    """Load config/{year}.json. Hard-fails with clear message if missing."""
-    path = Path("config") / f"{year}.json"
+def load_config(year, trust_name):
+    """Load config/{year}_{trust_name}.json. Hard-fails with clear message if missing."""
+    path = Path("config") / f"{year}_{trust_name}.json"
     if not path.exists():
         print(f"ERROR: Config file not found: {path}", file=sys.stderr)
         sys.exit(1)
@@ -30,7 +32,7 @@ def load_config(year=2025):
         return json.load(f)
 
 
-def load_fields(year=2025):
+def load_fields(year):
     """Load config/{year}_fields.json. Hard-fails if missing."""
     path = Path("config") / f"{year}_fields.json"
     if not path.exists():
@@ -44,11 +46,30 @@ def load_fields(year=2025):
 # Argument parsing
 # ---------------------------------------------------------------------------
 
+def parse_trust_and_year():
+    """First pass: extract --trust and --year before loading config.
+
+    --trust is required (no default) to prevent accidentally running for the wrong trust.
+    Returns (trust_name, year) tuple.
+    """
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--trust", required=True, choices=["trent", "chris"])
+    parser.add_argument("--year", type=int, default=2025)
+    known, _ = parser.parse_known_args()
+    return known.trust, known.year
+
+
 def parse_args(cfg):
     """Build argparse using config defaults. Returns parsed namespace."""
     paths = cfg.get("paths", {})
     parser = argparse.ArgumentParser(
         description="Fill Form 1041 and attachments from brokerage CSV."
+    )
+    parser.add_argument(
+        "--trust",
+        required=True,
+        choices=["trent", "chris"],
+        help="Trust short name (required)",
     )
     parser.add_argument(
         "--year",
@@ -59,7 +80,7 @@ def parse_args(cfg):
     )
     parser.add_argument(
         "--csv",
-        default=paths.get("csv_input", "2025/XXXX-X123.CSV"),
+        default=paths.get("csv_input"),
         metavar="PATH",
         help="Path to brokerage CSV (default: %(default)s)",
     )
@@ -352,9 +373,12 @@ def compute_schedule_g(taxable_income, qual_div, lt_net_gain, cfg):
         ordinary_tax = b10 * 0.10 + (b24 - b10) * 0.24 + (b35 - b24) * 0.35 + (ordinary_income - b35) * 0.37
 
     # Capital gains / qualified dividends tax — ordinary income fills lower brackets first
+    # Cap the total preferential amount at taxable_income (mirrors Schedule D Part V line 31)
+    # to prevent overflow when qualified dividends exceed taxable income
+    capped_preferential = min(preferential_income, taxable_income)
     zero_bucket = max(0.0, min(zero_max, taxable_income) - ordinary_income)
     fifteen_bucket = max(0.0, min(twenty_thresh, taxable_income) - ordinary_income - zero_bucket)
-    twenty_bucket = max(0.0, preferential_income - zero_bucket - fifteen_bucket)
+    twenty_bucket = max(0.0, capped_preferential - zero_bucket - fifteen_bucket)
 
     cap_gains_tax = zero_bucket * 0.00 + fifteen_bucket * 0.15 + twenty_bucket * 0.20
 
@@ -961,19 +985,17 @@ def fill_form(field_values, form_path, output_path):
 # ---------------------------------------------------------------------------
 
 def main():
-    # 1. Load config (year=2025 default for initial load to get paths)
-    cfg = load_config(year=2025)
+    # 1. Parse --trust and --year first (before loading config)
+    trust_name, year = parse_trust_and_year()
 
-    # 2. Load fields catalog
-    fields = load_fields(year=2025)
+    # 2. Load config for selected trust
+    cfg = load_config(year, trust_name)
 
-    # 3. Parse args using loaded config for defaults
+    # 3. Load fields catalog (shared across trusts — same IRS forms)
+    fields = load_fields(year)
+
+    # 4. Parse remaining args using loaded config for defaults
     args = parse_args(cfg)
-
-    # Reload config/fields if a different year was specified
-    if args.year != 2025:
-        cfg = load_config(year=args.year)
-        fields = load_fields(year=args.year)
 
     # 4. Print header
     print_header(args, cfg)
