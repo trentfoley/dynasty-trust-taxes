@@ -1,0 +1,59 @@
+{
+  "tax_year": 2025,
+  "trust": {
+    "name": "Christopher Foley Childrens 2021 Super Dynasty Trust",
+    "ein": "87-6898455",
+    "fiduciary_name_title": "Christopher B. Foley, Trustee",
+    "address_street": "23606 Powder Mill Dr",
+    "address_city": "Tomball",
+    "address_state": "TX",
+    "address_zip": "77377",
+    "date_entity_created": "12/14/2021",
+    "num_schedules_k1": "0"
+  },
+  "paths": {
+    "csv_input": "2025_chris/dividends.csv",
+    "blank_form": "forms/f1041.pdf",
+    "output_dir": "output/chris"
+  },
+  "ordinary_income_brackets": {
+    "10_pct_max": 3150,
+    "24_pct_max": 11450,
+    "35_pct_max": 15650,
+    "37_pct_rate": 0.37
+  },
+  "capital_gains_brackets": {
+    "0_pct_max": 3250,
+    "15_pct_max": 15900,
+    "20_pct_threshold": 15900
+  },
+  "niit": {
+    "rate": 0.038,
+    "threshold": 15650
+  },
+  "qdcg_worksheet": {
+    "0_pct_max": 3250,
+    "20_pct_threshold": 15900
+  },
+  "trust_exemption": 100,
+  "deductions": {
+    "attorney_accountant_fees": 500.00
+  },
+  "entity_type": "complex_trust",
+  "other_information": {
+    "q1_tax_exempt_income": "No",
+    "q2_contract_assignment": "No",
+    "q3_foreign_account": "No",
+    "q4_foreign_trust": "No",
+    "q5_qualified_residence_interest": "No",
+    "q6_sec663b_election": false,
+    "q7_sec643e3_election": false,
+    "q8_estate_open_2years": false,
+    "q9_beneficiaries_skip_persons": "No",
+    "q10_form8938_required": "No",
+    "q11a_965i_distribution": "No",
+    "q11b_beneficiary_agreement": "No",
+    "q12_965i_transfer": "No",
+    "q13_digital_assets": "No"
+  }
+}

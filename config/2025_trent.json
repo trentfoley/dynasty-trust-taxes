@@ -13,9 +13,9 @@
     "num_schedules_k1": "0"
   },
   "paths": {
-    "csv_input": "2025/XXXX-X123.CSV",
+    "csv_input": "2025_trent/XXXX-X123.CSV",
     "blank_form": "forms/f1041.pdf",
-    "output_dir": "output"
+    "output_dir": "output/trent"
   },
   "ordinary_income_brackets": {
     "10_pct_max": 3150,
