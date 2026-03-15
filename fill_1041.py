@@ -933,6 +933,107 @@ def print_summary(page1, sched_g, form_8960, output_paths, needs_form_8960=True)
 
 
 # ---------------------------------------------------------------------------
+# Amended return explanation statement
+# ---------------------------------------------------------------------------
+
+def write_amended_statement(output_path, cfg, year, amount_paid, corrected_tax,
+                            original_sched_g, corrected_sched_g,
+                            original_niit, corrected_niit,
+                            original_sched_b_line1, corrected_sched_b_line1):
+    """Write an explanation statement for an amended Form 1041 return."""
+    trust = cfg.get("trust", {})
+    trust_name = trust.get("name", "Trust")
+    ein = trust.get("ein", "")
+    overpayment = round(amount_paid - corrected_tax, 2)
+
+    lines = []
+    lines.append("EXPLANATION OF CHANGES")
+    lines.append(f"Amended Form 1041 — Tax Year {year}")
+    lines.append("")
+    lines.append(f"Trust:  {trust_name}")
+    lines.append(f"EIN:    {ein}")
+    lines.append("")
+    lines.append("-" * 70)
+    lines.append("")
+    lines.append("This amended return corrects the following errors on the original")
+    lines.append(f"Form 1041 filed for tax year {year}:")
+    lines.append("")
+
+    change_num = 1
+
+    # Schedule G correction
+    if original_sched_g != corrected_sched_g:
+        diff = round(original_sched_g - corrected_sched_g, 2)
+        lines.append(f"{change_num}. Schedule G, Line 1a — Tax on Taxable Income")
+        lines.append("")
+        lines.append(f"   Original:   ${original_sched_g:,.2f}")
+        lines.append(f"   Corrected:  ${corrected_sched_g:,.2f}")
+        lines.append(f"   Change:     (${diff:,.2f})")
+        lines.append("")
+        lines.append("   The Qualified Dividends and Capital Gain Tax Worksheet")
+        lines.append("   incorrectly allowed preferential income (qualified dividends")
+        lines.append("   plus net long-term capital gain) to exceed taxable income when")
+        lines.append("   distributing income across rate brackets. Per the Schedule D")
+        lines.append("   Tax Worksheet (Part V), preferential income must be capped at")
+        lines.append("   taxable income before computing the 0%/15%/20% rate buckets.")
+        lines.append("")
+        change_num += 1
+
+    # Form 8960 NIIT correction
+    if original_niit != corrected_niit:
+        diff = round(original_niit - corrected_niit, 2)
+        lines.append(f"{change_num}. Form 8960, Line 19a — Adjusted Gross Income")
+        lines.append("")
+        lines.append(f"   Original Line 19a:  ${original_sched_b_line1:,.2f} (Form 1041, Line 9)")
+        lines.append(f"   Corrected Line 19a: ${corrected_sched_b_line1:,.2f} (Form 1041, Line 17)")
+        lines.append("")
+        lines.append(f"   Original NIIT (Line 21):   ${original_niit:,.2f}")
+        lines.append(f"   Corrected NIIT (Line 21):  ${corrected_niit:,.2f}")
+        lines.append(f"   Change:                    (${diff:,.2f})")
+        lines.append("")
+        lines.append("   Line 19a for estates and trusts should be the adjusted gross")
+        lines.append("   income from Form 1041, Line 17 (adjusted total income), not")
+        lines.append("   Line 9 (total income). The original return used total income")
+        lines.append("   before subtracting the deduction for professional fees,")
+        lines.append("   overstating AGI and the resulting NIIT.")
+        lines.append("")
+        change_num += 1
+
+    # Schedule B correction
+    if original_sched_b_line1 != corrected_sched_b_line1:
+        lines.append(f"{change_num}. Schedule B, Line 1 — Adjusted Total Income")
+        lines.append("")
+        lines.append(f"   Original:   ${original_sched_b_line1:,.2f} (Form 1041, Line 9)")
+        lines.append(f"   Corrected:  ${corrected_sched_b_line1:,.2f} (Form 1041, Line 17)")
+        lines.append("")
+        lines.append("   Per the instructions, Schedule B Line 1 should be the amount")
+        lines.append("   from Form 1041, Line 17 (adjusted total income after")
+        lines.append("   deductions), not Line 9 (total income). This correction")
+        lines.append("   reduces distributable net income (DNI) from $904 to $0, as")
+        lines.append("   the deduction for professional fees exceeds non-capital-gain")
+        lines.append("   income. No distributions were made, so this does not affect")
+        lines.append("   the current year's tax liability.")
+        lines.append("")
+        change_num += 1
+
+    lines.append("-" * 70)
+    lines.append("")
+    lines.append("SUMMARY OF TAX CHANGES")
+    lines.append("")
+    lines.append(f"   Original total tax:       ${amount_paid:,.2f}")
+    lines.append(f"   Corrected total tax:      ${corrected_tax:,.2f}")
+    lines.append(f"   Overpayment:              ${overpayment:,.2f}")
+    lines.append("")
+    lines.append(f"   Refund requested:         ${overpayment:,.2f}")
+    lines.append("")
+
+    statement = "\n".join(lines)
+    output_path.write_text(statement, encoding="utf-8")
+    print(f"Statement written: {output_path}")
+    return output_path
+
+
+# ---------------------------------------------------------------------------
 # Form 1041-V field map
 # ---------------------------------------------------------------------------
 
@@ -1211,6 +1312,35 @@ def main():
         total_tax = computed["total_tax"]
         voucher_map = build_1041v_field_map(cfg, total_tax)
         fill_form(voucher_map, form_pdfs["form_1041v"], output_paths["form_1041v"])
+
+    # Amended return explanation statement
+    if args.amended and args.amount_paid > 0:
+        statement_path = output_dir / f"{year} Amended Return Statement {entity_name}.txt"
+        # Derive what the original (incorrect) values were:
+        # - Schedule B Line 1 and Form 8960 Line 19a both used total_income instead of adjusted_total_income
+        # - Schedule G used uncapped preferential_income
+        original_total_income = page1["total_income"]
+        corrected_line17 = page1["adjusted_total_income"]
+        # Recompute what NIIT was with the old (incorrect) Line 19a = total_income
+        niit_cfg = cfg["niit"]
+        original_agi_excess = max(0.0, original_total_income - niit_cfg["threshold"])
+        original_niit = round(min(form_8960["total_nii"], original_agi_excess) * niit_cfg["rate"], 2)
+        # Original Schedule G = amount_paid - original_niit
+        original_sched_g = round(args.amount_paid - original_niit, 2)
+        write_amended_statement(
+            output_path=statement_path,
+            cfg=cfg,
+            year=year,
+            amount_paid=args.amount_paid,
+            corrected_tax=computed["total_tax"],
+            original_sched_g=original_sched_g,
+            corrected_sched_g=sched_g["tax_on_taxable_income"],
+            original_niit=original_niit,
+            corrected_niit=form_8960["niit_amount"],
+            original_sched_b_line1=original_total_income,
+            corrected_sched_b_line1=corrected_line17,
+        )
+        output_paths["statement"] = statement_path
 
     # 12. Print summary
     print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()],
