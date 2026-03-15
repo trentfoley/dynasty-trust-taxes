@@ -1070,6 +1070,26 @@ def build_1041v_field_map(cfg, total_tax):
 
 
 # ---------------------------------------------------------------------------
+# PDF combine helper
+# ---------------------------------------------------------------------------
+
+def combine_pdfs(pdf_paths, output_path):
+    """Merge multiple filled PDFs into a single combined PDF.
+
+    Args:
+        pdf_paths: list of Path objects to filled PDFs, in desired order
+        output_path: Path for the combined output PDF
+    """
+    from pypdf import PdfWriter
+    writer = PdfWriter()
+    for path in pdf_paths:
+        writer.append(str(path))
+    with open(output_path, "wb") as fh:
+        writer.write(fh)
+    print(f"Combined PDF written to: {output_path}")
+
+
+# ---------------------------------------------------------------------------
 # PDF fill helper
 # ---------------------------------------------------------------------------
 
@@ -1341,6 +1361,13 @@ def main():
             corrected_sched_b_line1=corrected_line17,
         )
         output_paths["statement"] = statement_path
+
+    # Combine all filled PDFs into a single file
+    form_order = ["form_1041", "schedule_d", "form_8949", "form_8960", "form_1041v"]
+    filled_pdfs = [output_paths[k] for k in form_order if k in output_paths]
+    combined_path = output_dir / f"{year} Combined {entity_name}.pdf"
+    combine_pdfs(filled_pdfs, combined_path)
+    output_paths["combined"] = combined_path
 
     # 12. Print summary
     print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()],
