@@ -95,6 +95,18 @@ def parse_args(cfg):
         action="store_true",
         help="Parse and compute without writing any files",
     )
+    parser.add_argument(
+        "--amended",
+        action="store_true",
+        help="Generate amended return (checks 'Amended return' box, computes overpayment)",
+    )
+    parser.add_argument(
+        "--amount-paid",
+        type=float,
+        default=0.0,
+        metavar="AMOUNT",
+        help="Amount already paid with original return (for amended returns)",
+    )
     return parser.parse_args()
 
 
@@ -523,7 +535,7 @@ def validate(csv_data, computed, tolerance=1.00):
     return mismatches
 
 
-def build_field_maps(computed, fields, cfg=None):
+def build_field_maps(computed, fields, cfg=None, amended=False, amount_paid=0.0):
     """Map semantic computed values to AcroForm field IDs.
 
     Returns dict keyed by form name:
@@ -558,6 +570,7 @@ def build_field_maps(computed, fields, cfg=None):
     form_1041_map = {}
 
     # Page 1 income fields
+    total_tax = computed.get("total_tax", 0.0)
     p1_mappings = {
         "interest_income":             computed.get("interest_income"),
         "ordinary_dividends":          computed.get("ordinary_dividends"),
@@ -568,13 +581,31 @@ def build_field_maps(computed, fields, cfg=None):
         "attorney_accountant_fees":    computed.get("attorney_accountant_fees"),
         "total_deductions":            computed.get("total_deductions"),
         "taxable_income":              computed.get("taxable_income"),
-        "total_tax_from_schedule_g":   computed.get("total_tax"),
-        "tax_due":                     computed.get("total_tax"),
+        "total_tax_from_schedule_g":   total_tax,
     }
+    if amended and amount_paid > 0:
+        overpayment = round(amount_paid - total_tax, 2)
+        p1_mappings["total_payments"] = amount_paid
+        if overpayment > 0:
+            p1_mappings["overpayment"] = overpayment
+            p1_mappings["refund_amount"] = overpayment
+        else:
+            p1_mappings["tax_due"] = round(-overpayment, 2)
+    else:
+        p1_mappings["tax_due"] = total_tax
     for sem, val in p1_mappings.items():
         fid = resolve(page1_fields, sem)
         if fid and val is not None:
             form_1041_map[fid] = dollar(val)
+
+    # Amended return checkbox (Item F)
+    if amended:
+        entry = page1_fields.get("amended_return")
+        if isinstance(entry, dict):
+            fid = entry.get("field_id")
+            on_state = entry.get("on_state", "/1")
+            if fid:
+                form_1041_map[fid] = on_state
 
     # Line 17: adjusted total income (total income minus deductions, before exemption)
     fid = resolve(page1_fields, "adjusted_total_income")
@@ -1129,22 +1160,24 @@ def main():
         "rows": sched_d["rows"],
         "part5": sched_d_part5,
     })
-    field_maps = build_field_maps(computed, fields, cfg)
+    field_maps = build_field_maps(computed, fields, cfg,
+                                   amended=args.amended, amount_paid=args.amount_paid)
 
     # 9. Output paths and form PDFs (conditional based on trust needs)
     year = args.year
     output_dir = Path(args.output_dir)
     entity_name = cfg.get("trust", {}).get("name", "Trust")
 
-    # Always generate Form 1041 and 1041-V
+    # Always generate Form 1041; 1041-V only for non-amended (amended = refund, not payment)
     output_paths = {
         "form_1041":  output_dir / f"{year} 1041 {entity_name}.pdf",
-        "form_1041v": output_dir / f"{year} 1041-V {entity_name}.pdf",
     }
     form_pdfs = {
         "form_1041":  cfg["paths"]["blank_form"],   # forms/f1041.pdf
-        "form_1041v": "forms/f1041v.pdf",
     }
+    if not args.amended:
+        output_paths["form_1041v"] = output_dir / f"{year} 1041-V {entity_name}.pdf"
+        form_pdfs["form_1041v"] = "forms/f1041v.pdf"
 
     # Conditionally add Schedule D, Form 8949, Form 8960
     if needs_schedule_d:
@@ -1160,7 +1193,8 @@ def main():
     # 10. Dry-run: print full computation steps + field-value mapping then exit
     if args.dry_run:
         _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg,
-                       needs_schedule_d=needs_schedule_d, needs_form_8960=needs_form_8960)
+                       needs_schedule_d=needs_schedule_d, needs_form_8960=needs_form_8960,
+                       amended=args.amended, amount_paid=args.amount_paid)
         sys.exit(0)
 
     # 11. Live mode: create output directory and write filled PDFs
@@ -1172,18 +1206,29 @@ def main():
             continue
         fill_form(fmap, form_pdfs[form_key], output_paths[form_key])
 
-    # 1041-V payment voucher (built separately — not part of field_maps)
-    total_tax = computed["total_tax"]
-    voucher_map = build_1041v_field_map(cfg, total_tax)
-    fill_form(voucher_map, form_pdfs["form_1041v"], output_paths["form_1041v"])
+    # 1041-V payment voucher (only for non-amended returns)
+    if not args.amended:
+        total_tax = computed["total_tax"]
+        voucher_map = build_1041v_field_map(cfg, total_tax)
+        fill_form(voucher_map, form_pdfs["form_1041v"], output_paths["form_1041v"])
 
     # 12. Print summary
     print_summary(page1, sched_g, form_8960, [str(p) for p in output_paths.values()],
                   needs_form_8960=needs_form_8960)
+    if args.amended and args.amount_paid > 0:
+        overpayment = round(args.amount_paid - computed["total_tax"], 2)
+        print(f"\n  AMENDED RETURN")
+        print(f"  Amount previously paid:           ${args.amount_paid:,.2f}")
+        print(f"  Corrected total tax:              ${computed['total_tax']:,.2f}")
+        if overpayment > 0:
+            print(f"  Overpayment (refund):             ${overpayment:,.2f}")
+        else:
+            print(f"  Additional tax due:               ${-overpayment:,.2f}")
 
 
 def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields, cfg=None,
-                   needs_schedule_d=True, needs_form_8960=True):
+                   needs_schedule_d=True, needs_form_8960=True,
+                   amended=False, amount_paid=0.0):
     """Print full dry-run output: computation steps + field-value mapping."""
 
     total_tax = sched_g["tax_on_taxable_income"] + form_8960["niit_amount"]
@@ -1317,9 +1362,20 @@ def _print_dry_run(csv_data, sched_d, page1, sched_b, sched_g, form_8960, fields
         "rows": sched_d["rows"],
     })
 
-    field_maps = build_field_maps(computed, fields, cfg)
+    field_maps = build_field_maps(computed, fields, cfg, amended=amended, amount_paid=amount_paid)
 
     print()
+    if amended and amount_paid > 0:
+        overpayment = round(amount_paid - total_tax, 2)
+        print("=== Amended Return ===")
+        print(f"  Amount previously paid:           ${amount_paid:,.2f}")
+        print(f"  Corrected total tax:              ${total_tax:,.2f}")
+        if overpayment > 0:
+            print(f"  Overpayment (refund):             ${overpayment:,.2f}")
+        else:
+            print(f"  Additional tax due:               ${-overpayment:,.2f}")
+        print()
+
     print("=== Field-Value Mapping ===")
 
     print()
