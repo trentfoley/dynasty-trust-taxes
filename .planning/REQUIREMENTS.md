@@ -48,6 +48,24 @@
 - [x] **FIX-02**: Schedule B Line 6 is populated with the negative capital gain; Line 7 (DNI) is computed correctly
 - [x] **FIX-03**: Line 14 attorney/accountant fees are config-driven via `deductions.attorney_accountant_fees` in `config/YEAR.json`
 
+## v1.2 Multi-Trust Support (Phase 4)
+
+### Multi-Trust CLI & Config
+
+- [ ] **MULTI-01**: `fill_1041.py` accepts a required `--trust` flag (choices: trent, chris) that selects the per-trust config file `config/{year}_{trust}.json`
+- [ ] **MULTI-02**: Per-trust config files exist (`config/2025_trent.json`, `config/2025_chris.json`) with trust-specific identity, address, fees, and paths; brackets/thresholds duplicated (same tax year)
+- [ ] **MULTI-03**: Chris's 1099-DIV data is available as a manually-created CSV (`2025_chris/dividends.csv`) compatible with the existing `parse_csv()` state machine
+
+### Tax Computation Fix
+
+- [ ] **MULTI-04**: `compute_schedule_g()` caps preferential income at taxable income, producing correct tax when qualified dividends exceed taxable income (Chris: $779.35, not $824.41)
+
+### Conditional Form Generation
+
+- [ ] **MULTI-05**: Forms are generated conditionally — Schedule D and Form 8949 only when capital transactions exist; Form 8960 only when income exceeds NIIT threshold; Form 1041 always generated
+- [ ] **MULTI-06**: Output PDFs are organized in per-trust subdirectories (`output/trent/`, `output/chris/`) with filenames retaining the full trust name pattern
+- [ ] **MULTI-07**: Trent's tax computation and output are unchanged after the multi-trust refactor (regression: total tax = $23,120.87)
+
 ## v2 Requirements
 
 ### Enhanced Validation
@@ -100,12 +118,20 @@
 | FIX-01 | Phase 3 | Complete |
 | FIX-02 | Phase 3 | Complete |
 | FIX-03 | Phase 3 | Complete |
+| MULTI-01 | Phase 4 | Planned |
+| MULTI-02 | Phase 4 | Planned |
+| MULTI-03 | Phase 4 | Planned |
+| MULTI-04 | Phase 4 | Planned |
+| MULTI-05 | Phase 4 | Planned |
+| MULTI-06 | Phase 4 | Planned |
+| MULTI-07 | Phase 4 | Planned |
 
 **Coverage:**
-- v1 requirements: 22 total, v1.1 fixes: 3 total
-- Mapped to phases: 25
-- Unmapped: 0 ✓
+- v1 requirements: 22 total, v1.1 fixes: 3 total, v1.2 multi-trust: 7 total
+- Mapped to phases: 32
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-08*
 *Last updated: 2026-03-08 — revised for Claude skill approach; 5-phase Python pipeline replaced with 2-phase skill build*
+*Updated: 2026-03-14 — added v1.2 multi-trust requirements (MULTI-01 through MULTI-07) for Phase 4*

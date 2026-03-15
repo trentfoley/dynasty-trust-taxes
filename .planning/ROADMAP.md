@@ -61,16 +61,28 @@ Plans:
 - [ ] 03-01-PLAN.md — Apply all three bug fixes to fill_1041.py and config/2025.json (deductions support, Form 8960 AGI fix, Schedule B Line 6 fix)
 - [ ] 03-02-PLAN.md — Regenerate output PDFs and human-verify corrected values are visible in all forms
 
+### Phase 4: Adapt to work with my brother Chris's trust
+
+**Goal:** Refactor fill_1041.py for multi-trust support via `--trust` CLI flag, with per-trust config files, conditional form generation (Chris gets Form 1041 only; Trent gets all 4 forms), and a fix for the compute_schedule_g cap bug that manifests when qualified dividends exceed taxable income
+**Requirements**: MULTI-01, MULTI-02, MULTI-03, MULTI-04, MULTI-05, MULTI-06, MULTI-07
+**Depends on:** Phase 3
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Create Chris config + CSV, update Trent config paths, refactor CLI for --trust flag, fix compute_schedule_g cap bug
+- [ ] 04-02-PLAN.md — Implement conditional form generation, per-trust output directories, generate and verify PDFs for both trusts
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-08 |
 | 2. Core Skill | 3/3 | Complete   | 2026-03-09 |
-| 3. Correct issues found during external review | 0/2 | In progress | - |
+| 3. Correct issues found during external review | 2/2 | Complete | 2026-03-10 |
+| 4. Adapt to work with my brother Chris's trust | 0/2 | Planned | - |
 
 ---
 *Created: 2026-03-08*
@@ -78,3 +90,4 @@ Phases execute in numeric order: 1 → 2 → 3
 *Revised: 2026-03-08 — Phase 1 plans created (2 plans, Wave 1 parallel)*
 *Revised: 2026-03-08 — Phase 2 plans created (3 plans, Wave 1-2-3 sequential)*
 *Revised: 2026-03-10 — Phase 3 plans created (2 plans, Wave 1-2 sequential)*
+*Revised: 2026-03-14 — Phase 4 plans created (2 plans, Wave 1-2 sequential)*
